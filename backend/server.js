@@ -3,9 +3,11 @@ import { createServer } from "node:http";
 import { Server } from "socket.io";
 import { config } from "./src/config/index.js";
 import { connectDb } from "./src/libraries/db.js";
+import { ensureDefaultApiServices } from "./src/helpers/seedServices.js";
 
 const start = async () => {
     await connectDb();
+    await ensureDefaultApiServices();
     const server = createServer(app);
     const io = new Server(server, { cors: { origin: config.frontendUrl } });
     app.locals.io = io;

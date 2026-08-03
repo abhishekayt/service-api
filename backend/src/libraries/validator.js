@@ -54,6 +54,15 @@ export const validator = (method) => {
         case "setting-update":
             output = [];
             break;
+        case "user-register":
+            output = [name, email, password];
+            break;
+        case "user-login":
+            output = [email, password];
+            break;
+        case "api-key-create":
+            output = [name];
+            break;
         default:
             output = [];
     }

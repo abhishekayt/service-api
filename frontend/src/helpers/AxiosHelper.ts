@@ -4,6 +4,9 @@ import { toast } from "react-toastify";
 const env = {
     apiBase: process.env.NEXT_PUBLIC_API_URL,
     apiBaseAdmin: process.env.NEXT_PUBLIC_API_URL_ADMIN,
+    apiBaseUser:
+        process.env.NEXT_PUBLIC_API_URL_USER ||
+        (process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "")}/user` : ""),
     apiLicence: process.env.NEXT_PUBLIC_API_LICENCE || "",
     logErrors: process.env.NEXT_PUBLIC_LOG_ERRORS_IN_CONSOLE || "false"
 };
@@ -14,6 +17,12 @@ export const getAxios = (key?: number) => {
             return axios.create({
                 withCredentials: true,
                 baseURL: env.apiBaseAdmin,
+                headers: { "x-api-key": env.apiLicence }
+            });
+        case 2:
+            return axios.create({
+                withCredentials: true,
+                baseURL: env.apiBaseUser,
                 headers: { "x-api-key": env.apiLicence }
             });
         default:

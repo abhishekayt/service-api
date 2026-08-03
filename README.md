@@ -101,6 +101,19 @@ Frontend default: `http://localhost:3000`
 - Centralized route permission map for direct URL access control
 - Unauthorized state UI for blocked routes
 
+### Developer Portal (User)
+
+- User register/login with cookie JWT (`user_token`)
+- Dashboard with credit balance, recent usage, and ledger
+- API key create/list/revoke (secret shown once)
+- Usage history page
+- Public service API (path-based, no subdomains):
+  - `POST /api/v1/services/sms/send`
+  - `POST /api/v1/services/email/send`
+- Auth for services: `x-user-api-key` or `Authorization: Bearer <key>`
+- Credit debit before provider call; `402` on insufficient credits; refund on provider failure
+- Signup bonus: 100 credits (MVP)
+
 ## Key Admin API Endpoints
 
 ### Profile
@@ -168,3 +181,25 @@ Frontend default: `http://localhost:3000`
 - Date formatting uses `moment`
 - Central model exports from `backend/src/models/index.js`
 - Permission-aware UI and route-level protection in admin module
+
+## Developer / User API Endpoints
+
+### Auth & portal
+
+- `POST /api/user/register`
+- `POST /api/user/login`
+- `GET /api/user/profile`
+- `POST /api/user/logout`
+- `GET /api/user/dashboard`
+- `GET /api/user/usage`
+- `GET /api/user/api-keys`
+- `POST /api/user/api-keys`
+- `DELETE /api/user/api-keys/:id`
+
+### Public services (customer API key)
+
+- `POST /api/v1/services/:service/:action`  
+  Examples: `sms/send`, `email/send`  
+  Header: `x-user-api-key: sk_live_...`
+
+Frontend env (optional): `NEXT_PUBLIC_API_URL_USER` — defaults to `{NEXT_PUBLIC_API_URL}/user`
