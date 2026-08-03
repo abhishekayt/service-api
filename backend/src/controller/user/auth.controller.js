@@ -103,3 +103,63 @@ export const userLogout = async (req, res) => {
     res.clearCookie("user_token");
     return res.success([], "Logged out");
 };
+
+export const userUpdateProfile = async (req, res) => {
+    try {
+        const { name, email, mobile } = req.body;
+        if (!name || !email) {
+            return res.someThingWentWrong({ message: "Name and email are required" });
+        }
+
+        const conflict = await User.findOne({
+            _id: { $ne: req.user.id },
+            deletedAt: null,
+            $or: [
+                { email: email.toLowerCase() },
+                ...(mobile ? [{ mobile }] : [])
+            ]
+        });
+
+        if (conflict) {
+            return res.someThingWentWrong({ message: "Email or mobile number is already in use" });
+        }
+
+        const user = await User.findOne({ _id: req.user.id, deletedAt: null });
+        if (!user) return res.noRecords(false, "User not found");
+
+        user.name = name;
+        user.email = email.toLowerCase();
+        if (mobile) {
+            user.mobile = mobile;
+        } else {
+            user.mobile = undefined;
+        }
+
+        await user.save();
+        return res.successUpdate({ _id: user._id, name: user.name, email: user.email, mobile: user.mobile }, "Profile updated successfully");
+    } catch (error) {
+        return res.someThingWentWrong(error);
+    }
+};
+
+export const userUpdatePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.someThingWentWrong({ message: "Current password and new password are required" });
+        }
+
+        const user = await User.findOne({ _id: req.user.id, deletedAt: null }).select("+password");
+        if (!user) return res.noRecords(false, "User not found");
+
+        const ok = await bcrypt.compare(currentPassword, user.password);
+        if (!ok) return res.someThingWentWrong({ message: "Incorrect current password" });
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        return res.success([], "Password updated successfully");
+    } catch (error) {
+        return res.someThingWentWrong(error);
+    }
+};

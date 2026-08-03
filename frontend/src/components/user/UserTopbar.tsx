@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Menu, User as UserIcon, Coins, Sparkles, ExternalLink, KeyRound, PanelLeftOpen, PanelLeftClose } from "lucide-react";
+import { LogOut, Menu, User as UserIcon, Coins, Sparkles, ExternalLink, KeyRound, PanelLeftOpen, PanelLeftClose, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import AxiosHelperUser from "@/helpers/AxiosHelperUser";
@@ -114,6 +114,10 @@ export default function UserTopbar() {
                         <DropdownMenuItem onClick={() => router.push("/user/credits")}>
                             <Coins className="mr-2 h-4 w-4 text-slate-500" />
                             <span>Buy Credits</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push("/user/docs")}>
+                            <BookOpen className="mr-2 h-4 w-4 text-slate-500" />
+                            <span>Documentation</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 dark:text-red-400">

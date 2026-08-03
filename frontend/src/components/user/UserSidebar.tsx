@@ -17,7 +17,6 @@ const NAV_ITEMS = [
     { href: "/user/credits", label: "Buy Credits", icon: Coins, badge: "Packs" },
     { href: "/user/usage", label: "Usage Logs", icon: ScrollText, badge: null },
     { href: "/user/playground", label: "API Playground", icon: Terminal, badge: "Live" },
-    { href: "/user/docs", label: "Documentation", icon: BookOpen, badge: "API" },
 ];
 
 export default function UserSidebar() {

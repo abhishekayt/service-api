@@ -1,6 +1,7 @@
 "use client";
 
 import UserSidebar from "@/components/user/UserSidebar";
+import DocsSidebar from "@/components/user/DocsSidebar";
 import UserTopbar from "@/components/user/UserTopbar";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
@@ -49,6 +50,8 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     if (loading && !isAuthPage) return <PageLoader />;
     if (isAuthPage) return children;
 
+    const isDocsPage = pathname.startsWith("/user/docs");
+
     return (
         <section className={`relative min-h-screen bg-slate-50/70 p-3 md:p-4 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans md:grid md:gap-5 ${
             sidebarCollapsed ? "md:grid-cols-[88px_1fr]" : "md:grid-cols-[260px_1fr]"
@@ -68,7 +71,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
                     mobileSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
                 }`}
             >
-                <UserSidebar />
+                {isDocsPage ? <DocsSidebar /> : <UserSidebar />}
             </div>
 
             {/* Main Application Area */}
