@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Coins, KeyRound, LayoutDashboard, ScrollText, Sparkles, Terminal, ChevronRight, BookOpen } from "lucide-react";
+import { Coins, KeyRound, LayoutDashboard, ScrollText, Sparkles, Terminal, ChevronRight, BookOpen, Settings } from "lucide-react";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
     { href: "/user/credits", label: "Buy Credits", icon: Coins, badge: "Packs" },
     { href: "/user/usage", label: "Usage Logs", icon: ScrollText, badge: null },
     { href: "/user/playground", label: "API Playground", icon: Terminal, badge: "Live" },
+    { href: "/user/settings", label: "Settings", icon: Settings, badge: null },
 ];
 
 export default function UserSidebar() {
