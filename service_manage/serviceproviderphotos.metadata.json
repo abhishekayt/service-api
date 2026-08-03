@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"providerId":{"$numberInt":"1"}},"name":"providerId_1","background":true}],"uuid":"f3794e3f6a404a09947f47da0741872f","collectionName":"serviceproviderphotos","type":"collection"}
