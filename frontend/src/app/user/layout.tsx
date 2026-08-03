@@ -17,7 +17,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     const pathname = usePathname();
     const dispatch = useAppDispatch();
     const settings = useAppSelector((state) => state.settings);
-    const { loading, mobileSidebarOpen } = useAppSelector((state) => state.app);
+    const { sidebarCollapsed, loading, mobileSidebarOpen } = useAppSelector((state) => state.app);
 
     const isAuthPage = useMemo(() => ["/user/login", "/user/register"].includes(pathname), [pathname]);
 
@@ -50,7 +50,9 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     if (isAuthPage) return children;
 
     return (
-        <section className="relative min-h-screen bg-slate-50/70 p-3 md:p-4 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans md:grid md:grid-cols-[260px_1fr] md:gap-5">
+        <section className={`relative min-h-screen bg-slate-50/70 p-3 md:p-4 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans md:grid md:gap-5 ${
+            sidebarCollapsed ? "md:grid-cols-[88px_1fr]" : "md:grid-cols-[260px_1fr]"
+        }`}>
             {/* Mobile Overlay */}
             {mobileSidebarOpen ? (
                 <div
@@ -62,7 +64,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
 
             {/* Navigation Sidebar */}
             <div
-                className={`fixed inset-y-0 left-0 z-50 w-[280px] p-3 transition-transform duration-300 md:static md:z-auto md:w-auto md:p-0 ${
+                className={`fixed inset-y-0 left-0 z-50 w-[280px] p-3 transition-transform duration-300 md:relative md:z-30 md:w-auto md:p-0 ${
                     mobileSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
                 }`}
             >

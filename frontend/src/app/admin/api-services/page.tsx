@@ -17,7 +17,7 @@ type ApiServiceRow = {
 };
 
 const PROVIDERS: Record<string, string[]> = {
-    sms: ["stub", "textlocal"],
+    sms: ["stub", "textlocal", "test"],
     email: ["stub", "smtp"]
 };
 

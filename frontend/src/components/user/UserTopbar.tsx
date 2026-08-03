@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Menu, User as UserIcon, Coins, Sparkles, ExternalLink, KeyRound } from "lucide-react";
+import { LogOut, Menu, User as UserIcon, Coins, Sparkles, ExternalLink, KeyRound, PanelLeftOpen, PanelLeftClose } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import AxiosHelperUser from "@/helpers/AxiosHelperUser";
@@ -14,7 +14,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { toggleMobileSidebarOpen } from "@/store/slices/appSlice";
+import { toggleMobileSidebarOpen, toggleSidebarCollapsed } from "@/store/slices/appSlice";
 import { resetUser } from "@/store/slices/userSlice";
 import Link from "next/link";
 
@@ -22,6 +22,7 @@ export default function UserTopbar() {
     const router = useRouter();
     const dispatch = useAppDispatch();
     const user = useAppSelector((state) => state.user);
+    const isSidebarCollapsed = useAppSelector((state) => state.app.sidebarCollapsed);
 
     const handleLogout = async () => {
         const { data } = await AxiosHelperUser.postData("/logout", {});
@@ -47,6 +48,21 @@ export default function UserTopbar() {
                     aria-label="Toggle Navigation"
                 >
                     <Menu className="h-5 w-5 text-slate-700 dark:text-slate-200" />
+                </Button>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="hidden md:flex"
+                    onClick={() => dispatch(toggleSidebarCollapsed())}
+                    aria-label="Toggle desktop sidebar"
+                    title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                >
+                    {isSidebarCollapsed ? (
+                        <PanelLeftOpen className="h-5 w-5 text-slate-700 dark:text-slate-200" />
+                    ) : (
+                        <PanelLeftClose className="h-5 w-5 text-slate-700 dark:text-slate-200" />
+                    )}
                 </Button>
                 <div>
                     <h2 className="text-base font-bold tracking-tight text-slate-900 dark:text-white">

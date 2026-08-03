@@ -30,7 +30,7 @@ export const userRegister = async (req, res) => {
         const user = await User.create({
             name,
             email: email.toLowerCase(),
-            mobile: mobile || null,
+            ...(mobile ? { mobile } : {}),
             password: hashed
         });
 

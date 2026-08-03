@@ -1,5 +1,6 @@
 import * as smsStub from "./sms/stub.js";
 import * as smsTextlocal from "./sms/textlocal.js";
+import * as smsTest from "./sms/test.js";
 import * as emailStub from "./email/stub.js";
 import * as emailSmtp from "./email/smtp.js";
 import { getSettingsMap } from "../helpers/settings.js";
@@ -7,7 +8,8 @@ import { getSettingsMap } from "../helpers/settings.js";
 const adapters = {
     sms: {
         stub: smsStub,
-        textlocal: smsTextlocal
+        textlocal: smsTextlocal,
+        test: smsTest
     },
     email: {
         stub: emailStub,
@@ -45,7 +47,7 @@ const normalizePayload = (serviceType, body) => {
 };
 
 const loadCredentials = async (serviceType, provider) => {
-    if (provider === "stub") return {};
+    if (provider === "stub" || provider === "test") return {};
     if (serviceType === "sms") return getSettingsMap(5);
     if (serviceType === "email") return getSettingsMap(3);
     return {};

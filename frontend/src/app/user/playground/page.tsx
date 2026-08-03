@@ -114,28 +114,16 @@ export default function ApiPlaygroundPage() {
                                 <KeyRound className="h-3.5 w-3.5 text-indigo-500" />
                                 API Secret Key (`x-user-api-key`)
                             </label>
-                            {keys.length > 0 ? (
-                                <select
-                                    value={selectedApiKey}
-                                    onChange={(e) => setSelectedApiKey(e.target.value)}
-                                    className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-                                >
-                                    <option value="">-- Select Active Key --</option>
-                                    {keys.map((k) => (
-                                        <option key={k._id} value={`${k.keyPrefix}`}>
-                                            {k.name} ({k.keyPrefix}••••••••)
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <input
-                                    type="text"
-                                    placeholder="sk_live_..."
-                                    value={selectedApiKey}
-                                    onChange={(e) => setSelectedApiKey(e.target.value)}
-                                    className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-sm text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-                                />
-                            )}
+                            <input
+                                type="password"
+                                placeholder="sk_live_..."
+                                value={selectedApiKey}
+                                onChange={(e) => setSelectedApiKey(e.target.value)}
+                                className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-sm text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                            />
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                                Please paste the full secret API key (e.g. <code>sk_live_...</code>). For security, only the prefix is stored on the server.
+                            </p>
                         </div>
 
                         {/* Service Type Switcher */}
