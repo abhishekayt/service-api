@@ -1,7 +1,7 @@
 import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/helpers/utils";
 
-export type BadgeVariant = "primary" | "secondary" | "success" | "warning" | "danger" | "info";
+export type BadgeVariant = "primary" | "secondary" | "success" | "warning" | "danger" | "info" | "gradient";
 
 const variantClass: Record<BadgeVariant, string> = {
     primary: "badge badge-primary",
@@ -9,7 +9,8 @@ const variantClass: Record<BadgeVariant, string> = {
     success: "badge badge-success",
     warning: "badge badge-warning",
     danger: "badge badge-danger",
-    info: "badge badge-info"
+    info: "badge badge-info",
+    gradient: "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xs font-semibold"
 };
 
 export type BadgeSize = "sm" | "md" | "lg";

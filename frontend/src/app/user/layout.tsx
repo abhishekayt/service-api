@@ -50,18 +50,33 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     if (isAuthPage) return children;
 
     return (
-        <section className="relative min-h-[calc(100vh-3.5rem)] bg-linear-to-br from-[#f3f7ff] via-white to-[#e8efff] p-3 dark:from-[#0b1020] dark:via-[#111a2f] dark:to-[#172443] md:grid md:grid-cols-[260px_1fr] md:gap-4">
+        <section className="relative min-h-screen bg-slate-50/70 p-3 md:p-4 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans md:grid md:grid-cols-[260px_1fr] md:gap-5">
+            {/* Mobile Overlay */}
             {mobileSidebarOpen ? (
-                <button className="fixed inset-0 z-30 bg-slate-900/40 md:hidden" onClick={() => dispatch(setMobileSidebarOpen(false))} aria-label="Close sidebar overlay" />
+                <div
+                    className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs md:hidden"
+                    onClick={() => dispatch(setMobileSidebarOpen(false))}
+                    aria-hidden="true"
+                />
             ) : null}
-            <div className={`fixed inset-y-0 left-0 z-40 w-[284px] p-3 transition-transform md:static md:z-auto md:w-auto md:p-0 ${mobileSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
+
+            {/* Navigation Sidebar */}
+            <div
+                className={`fixed inset-y-0 left-0 z-50 w-[280px] p-3 transition-transform duration-300 md:static md:z-auto md:w-auto md:p-0 ${
+                    mobileSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+                }`}
+            >
                 <UserSidebar />
             </div>
-            <div className="flex min-h-[calc(100vh-2rem)] flex-col gap-4">
+
+            {/* Main Application Area */}
+            <div className="flex min-h-[calc(100vh-2rem)] flex-col gap-4 md:gap-5">
                 <UserTopbar />
-                <div className="flex-1 rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/95">{children}</div>
-                <footer className="rounded-2xl border border-indigo-100 bg-white/90 px-4 py-3 text-center text-xs text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-400">
-                    {settings.copyright?.trim() || `Copyright © ${new Date().getFullYear()}. All rights reserved.`}
+                <main className="flex-1 rounded-2xl border border-slate-200/80 bg-white/80 p-5 md:p-6 shadow-xs backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/90">
+                    {children}
+                </main>
+                <footer className="rounded-2xl border border-slate-200/80 bg-white/60 px-4 py-3 text-center text-xs text-slate-500 shadow-2xs backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/60 dark:text-slate-400">
+                    {settings.copyright?.trim() || `Copyright © ${new Date().getFullYear()} ${settings.application_name || 'Service API'}. All rights reserved.`}
                 </footer>
             </div>
         </section>
