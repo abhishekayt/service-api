@@ -61,6 +61,9 @@ export default function UserDashboardPage() {
                             <Coins className="h-5 w-5" />
                         </div>
                     </div>
+                    <Link href="/user/credits" className="mt-3 inline-block text-xs font-medium text-indigo-600">
+                        Buy more credits →
+                    </Link>
                 </div>
                 <Link href="/user/api-keys" className="rounded-2xl border border-indigo-100 bg-white p-4 shadow-sm transition hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900">
                     <div className="flex items-center justify-between">

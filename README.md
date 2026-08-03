@@ -106,13 +106,22 @@ Frontend default: `http://localhost:3000`
 - User register/login with cookie JWT (`user_token`)
 - Dashboard with credit balance, recent usage, and ledger
 - API key create/list/revoke (secret shown once)
+- Buy credits via Razorpay checkout + webhook credit top-up
 - Usage history page
 - Public service API (path-based, no subdomains):
   - `POST /api/v1/services/sms/send`
   - `POST /api/v1/services/email/send`
+- Provider adapters: SMS (`stub`, `textlocal`), Email (`stub`, `smtp`) selected per ApiService
 - Auth for services: `x-user-api-key` or `Authorization: Bearer <key>`
 - Credit debit before provider call; `402` on insufficient credits; refund on provider failure
 - Signup bonus: 100 credits (MVP)
+
+### Admin Platform Controls
+
+- Platform users list + manual credit adjust
+- API services pricing/provider toggle
+- Credit packs CRUD
+- Payments list (Razorpay orders)
 
 ## Key Admin API Endpoints
 

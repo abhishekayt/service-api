@@ -19,7 +19,16 @@ app.use(
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     })
 );
-app.use(express.json({ limit: "2mb" }));
+app.use(
+    express.json({
+        limit: "2mb",
+        verify: (req, res, buf) => {
+            if (req.originalUrl?.startsWith("/api/webhooks/")) {
+                req.rawBody = buf;
+            }
+        }
+    })
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));

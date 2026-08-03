@@ -49,9 +49,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         (async () => {
             dispatch(setLoading(true));
             const { data } = await AxiosHelperAdmin.getData("/profile");
+
             if (data.status) {
+                dispatch(setLoading(false));
                 dispatch(updateAdmin(data.data));
-                dispatch(setLoading(true));
             } else {
                 if (!isLoginPage) router.push("/admin/login");
                 dispatch(setLoading(false));

@@ -9,6 +9,19 @@ import { getCountry, createCountry, updateCountry, deleteCountry, getSingleCount
 import { getState, createState, updateState, deleteState, getSingleState } from "../controller/admin/state.controller.js";
 import { getCity, createCity, updateCity, deleteCity, getSingleCity } from "../controller/admin/city.controller.js";
 import { getDashboardStats } from "../controller/admin/dashboard.controller.js";
+import {
+    adjustUserCredits,
+    createCreditPackAdmin,
+    deleteCreditPackAdmin,
+    listApiServicesAdmin,
+    listCreditPacksAdmin,
+    listPaymentsAdmin,
+    listPlatformUsers,
+    listUsageAdmin,
+    platformStats,
+    updateApiServiceAdmin,
+    updateCreditPackAdmin
+} from "../controller/admin/platform.controller.js";
 import { Storage } from "../libraries/storage.js";
 
 const router = Router();
@@ -19,6 +32,7 @@ router.use(requireAdminAuth);
 
 // Dashboard
 router.get("/dashboard-stats", getDashboardStats);
+router.get("/platform-stats", platformStats);
 
 // Profile
 router.get("/profile", adminProfile);
@@ -31,6 +45,24 @@ router.post("/logout", adminLogout);
 router.get("/settings", getSettings);
 router.get("/settings/:type", getSettings);
 router.put("/settings/:type", appSettingStorage.any(), validator("setting-update"), updateSettingsByType);
+
+// Platform users / credits
+router.get("/platform-users", listPlatformUsers);
+router.post("/platform-users/:id/credits", adjustUserCredits);
+
+// API services catalog
+router.get("/api-services", listApiServicesAdmin);
+router.put("/api-services/:id", updateApiServiceAdmin);
+
+// Credit packs
+router.get("/credit-packs", listCreditPacksAdmin);
+router.post("/credit-packs", createCreditPackAdmin);
+router.put("/credit-packs/:id", updateCreditPackAdmin);
+router.delete("/credit-packs/:id", deleteCreditPackAdmin);
+
+// Payments & usage
+router.get("/payments", listPaymentsAdmin);
+router.get("/usage-logs", listUsageAdmin);
 
 // Roles
 router.post("/roles", validator("role"), createRole);
@@ -68,6 +100,5 @@ router.put("/cities/:id", validator("city"), updateCity);
 router.delete("/cities/:id", deleteCity);
 router.get("/cities/:id", getSingleCity);
 router.get("/cities", getCity);
-
 
 export default router;

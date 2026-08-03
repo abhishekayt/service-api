@@ -1,4 +1,4 @@
-import { Building2, Globe, LayoutDashboard, Map, MapPinned, Settings, Shield, UserCog, Users } from "lucide-react";
+import { Building2, Coins, CreditCard, Globe, LayoutDashboard, Map, MapPinned, Package, Settings, Shield, UserCog, Users, Webhook } from "lucide-react";
 
 export type SidebarItem = {
     href: string;
@@ -89,6 +89,16 @@ export const PERMISSIONS = [
 export const MENU: Array<SidebarItem | SidebarGroup> = [
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, permission_id: true },
     {
+        label: "Platform",
+        icon: Webhook,
+        children: [
+            { href: "/admin/platform-users", label: "Users", icon: Users, permission_id: true },
+            { href: "/admin/api-services", label: "API Services", icon: Package, permission_id: true },
+            { href: "/admin/credit-packs", label: "Credit Packs", icon: Coins, permission_id: true },
+            { href: "/admin/payments", label: "Payments", icon: CreditCard, permission_id: true },
+        ]
+    },
+    {
         label: "User Management",
         icon: Shield,
         children: [
@@ -117,6 +127,10 @@ export const ADMIN_ROUTE_PERMISSIONS: RoutePermissionRule[] = [
     { path: "/admin/countries", permission_id: 304 },
     { path: "/admin/states", permission_id: 314 },
     { path: "/admin/cities", permission_id: 324 },
+    { path: "/admin/platform-users", permission_id: true },
+    { path: "/admin/api-services", permission_id: true },
+    { path: "/admin/credit-packs", permission_id: true },
+    { path: "/admin/payments", permission_id: true },
 ];
 
 export const ADMIN_BREADCRUMB_ROUTES: AdminBreadcrumbRule[] = [
@@ -127,6 +141,10 @@ export const ADMIN_BREADCRUMB_ROUTES: AdminBreadcrumbRule[] = [
     { path: "/admin/countries", items: [{ label: "Countries" }] },
     { path: "/admin/states", items: [{ label: "States" }] },
     { path: "/admin/cities", items: [{ label: "Cities" }] },
+    { path: "/admin/platform-users", items: [{ label: "Platform Users" }] },
+    { path: "/admin/api-services", items: [{ label: "API Services" }] },
+    { path: "/admin/credit-packs", items: [{ label: "Credit Packs" }] },
+    { path: "/admin/payments", items: [{ label: "Payments" }] },
     {
         path: "/admin/roles/permissions/",
         startsWith: true,

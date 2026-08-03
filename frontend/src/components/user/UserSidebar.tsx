@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { KeyRound, LayoutDashboard, ScrollText } from "lucide-react";
+import { Coins, KeyRound, LayoutDashboard, ScrollText } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 import { cn, resolveFileUrl } from "@/helpers/utils";
 import Image from "@/components/ui/Image";
@@ -10,6 +10,7 @@ import Image from "@/components/ui/Image";
 const MENU = [
     { href: "/user/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/user/api-keys", label: "API Keys", icon: KeyRound },
+    { href: "/user/credits", label: "Buy Credits", icon: Coins },
     { href: "/user/usage", label: "Usage", icon: ScrollText }
 ];
 

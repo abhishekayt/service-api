@@ -6,11 +6,13 @@ import openRoutes from "./open.routes.js";
 import userAuthRoutes from "./userAuth.routes.js";
 import userRoutes from "./user.routes.js";
 import v1Routes from "./v1.routes.js";
+import webhookRoutes from "./webhook.routes.js";
 
 const router = Router();
 
 router.use("/", openRoutes);
 router.use("/auth", authRoutes);
+router.use("/webhooks", webhookRoutes);
 
 router.use("/admin", adminAuthRoutes);
 router.use("/admin", adminRoutes);

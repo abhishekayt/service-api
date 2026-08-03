@@ -4,10 +4,12 @@ import { Server } from "socket.io";
 import { config } from "./src/config/index.js";
 import { connectDb } from "./src/libraries/db.js";
 import { ensureDefaultApiServices } from "./src/helpers/seedServices.js";
+import { ensureDefaultCreditPacks } from "./src/helpers/seedCreditPacks.js";
 
 const start = async () => {
     await connectDb();
     await ensureDefaultApiServices();
+    await ensureDefaultCreditPacks();
     const server = createServer(app);
     const io = new Server(server, { cors: { origin: config.frontendUrl } });
     app.locals.io = io;

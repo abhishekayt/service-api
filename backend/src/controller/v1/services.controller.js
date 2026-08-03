@@ -1,57 +1,7 @@
 import { ApiService, UsageLog, Wallet } from "../../models/index.js";
 import { debitWallet, refundCredits } from "../../helpers/credits.js";
 import { ensureDefaultApiServices } from "../../helpers/seedServices.js";
-
-const stubSendSms = async ({ to, message }) => {
-    // MVP stub — replace with TextLocal / other provider later
-    return {
-        provider: "stub",
-        messageId: `stub_sms_${Date.now()}`,
-        to,
-        message,
-        delivered: true
-    };
-};
-
-const stubSendEmail = async ({ to, subject, body }) => {
-    return {
-        provider: "stub",
-        messageId: `stub_email_${Date.now()}`,
-        to,
-        subject,
-        body,
-        delivered: true
-    };
-};
-
-const runService = async (slug, body) => {
-    if (slug === "sms.send") {
-        const to = String(body.to || "").trim();
-        const message = String(body.message || "").trim();
-        if (!to || !message) {
-            const err = new Error("Fields 'to' and 'message' are required");
-            err.code = "VALIDATION";
-            throw err;
-        }
-        return stubSendSms({ to, message });
-    }
-
-    if (slug === "email.send") {
-        const to = String(body.to || "").trim();
-        const subject = String(body.subject || "").trim();
-        const emailBody = String(body.body || body.message || "").trim();
-        if (!to || !subject || !emailBody) {
-            const err = new Error("Fields 'to', 'subject' and 'body' are required");
-            err.code = "VALIDATION";
-            throw err;
-        }
-        return stubSendEmail({ to, subject, body: emailBody });
-    }
-
-    const err = new Error("Service handler not implemented");
-    err.code = "NOT_IMPLEMENTED";
-    throw err;
-};
+import { executeProvider } from "../../providers/registry.js";
 
 export const invokeService = async (req, res) => {
     const started = Date.now();
@@ -106,7 +56,11 @@ export const invokeService = async (req, res) => {
             throw error;
         }
 
-        const result = await runService(slug, req.body);
+        const result = await executeProvider({
+            serviceType: serviceName,
+            provider: service.provider || "stub",
+            body: req.body
+        });
 
         usageLog = await UsageLog.create({
             userId: req.apiUser._id,
@@ -126,6 +80,7 @@ export const invokeService = async (req, res) => {
             {
                 usageId: usageLog._id,
                 service: slug,
+                provider: result.provider,
                 creditsCharged: creditCost,
                 balanceRemaining: wallet?.balance ?? null,
                 result
@@ -159,7 +114,7 @@ export const invokeService = async (req, res) => {
             latencyMs: Date.now() - started
         });
 
-        const statusCode = error.code === "VALIDATION" ? 400 : 502;
+        const statusCode = error.code === "VALIDATION" || error.code === "PROVIDER_CONFIG" ? 400 : 502;
         return res.status(statusCode).json({
             status: false,
             message: error.message || "Service failed",

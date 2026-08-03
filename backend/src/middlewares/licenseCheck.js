@@ -5,6 +5,7 @@ export const licenseCheck = (request, response, next) => {
         request.originalUrl.startsWith("/uploads/") ||
         request.originalUrl.startsWith("/api/settings/seed") ||
         request.originalUrl.startsWith("/api/v1/") ||
+        request.originalUrl.startsWith("/api/webhooks/") ||
         request.originalUrl.startsWith("/health") ||
         licenseKey === process.env.X_API_KEY
     ) {

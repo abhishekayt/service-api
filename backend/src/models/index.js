@@ -24,3 +24,5 @@ export { CreditLedger } from "./CreditLedger.js";
 export { ApiKey } from "./ApiKey.js";
 export { ApiService } from "./ApiService.js";
 export { UsageLog } from "./UsageLog.js";
+export { CreditPack } from "./CreditPack.js";
+export { PaymentOrder } from "./PaymentOrder.js";
