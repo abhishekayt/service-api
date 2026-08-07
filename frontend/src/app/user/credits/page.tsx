@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import moment from "moment";
 import { toast } from "react-toastify";
-import { Coins, Zap, CheckCircle2, ShieldCheck, Sparkles, CreditCard, ArrowRight } from "lucide-react";
+import { Coins, Zap, CheckCircle2, ArrowRight, Receipt, History } from "lucide-react";
 import AxiosHelperUser from "@/helpers/AxiosHelperUser";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Badge, statusToBadgeVariant } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { updateUser } from "@/store/slices/userSlice";
 
@@ -16,6 +18,17 @@ type CreditPack = {
     credits: number;
     amountInPaise: number;
     currency: string;
+};
+
+type PaymentItem = {
+    _id: string;
+    credits: number;
+    amountInPaise: number;
+    currency: string;
+    razorpayOrderId: string;
+    razorpayPaymentId?: string | null;
+    status: "created" | "paid" | "failed" | "cancelled" | string;
+    createdAt: string;
 };
 
 declare global {
@@ -42,13 +55,28 @@ export default function BuyCreditsPage() {
     const user = useAppSelector((state) => state.user);
     const [packs, setPacks] = useState<CreditPack[]>([]);
     const [buyingId, setBuyingId] = useState<string | null>(null);
+    const [payments, setPayments] = useState<PaymentItem[]>([]);
+    const [loadingPayments, setLoadingPayments] = useState<boolean>(true);
+
+    const fetchPayments = useCallback(async () => {
+        setLoadingPayments(true);
+        try {
+            const { data } = await AxiosHelperUser.getData("/payments", { limit: 50, pageNo: 1 });
+            if (data?.status) {
+                setPayments(data.data?.record || []);
+            }
+        } finally {
+            setLoadingPayments(false);
+        }
+    }, []);
 
     useEffect(() => {
         (async () => {
             const { data } = await AxiosHelperUser.getData("/credit-packs");
             if (data?.status) setPacks(data.data || []);
         })();
-    }, []);
+        fetchPayments();
+    }, [fetchPayments]);
 
     const buyPack = async (pack: CreditPack) => {
         setBuyingId(pack._id);
@@ -88,6 +116,7 @@ export default function BuyCreditsPage() {
                     } else {
                         toast.error(verify.data?.message || "Payment verification failed");
                     }
+                    fetchPayments();
                 }
             });
             rzp.open();
@@ -97,7 +126,7 @@ export default function BuyCreditsPage() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* Header section */}
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
@@ -210,6 +239,94 @@ export default function BuyCreditsPage() {
                     <p className="text-xs text-slate-500">Please check back later or contact platform support.</p>
                 </div>
             )}
+
+            {/* Payment Ledger History Section */}
+            <Card className="border-slate-200/80 dark:border-slate-800">
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <Receipt className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                            Payment Ledger & Order History
+                        </CardTitle>
+                        <CardDescription>
+                            Track all top-up transactions, Razorpay order IDs, and status updates.
+                        </CardDescription>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Order Reference</TableHead>
+                                <TableHead>Credits</TableHead>
+                                <TableHead>Amount</TableHead>
+                                <TableHead>Payment ID</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Date & Time</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {loadingPayments ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="h-24 text-center text-slate-500">
+                                        Loading payment ledger...
+                                    </TableCell>
+                                </TableRow>
+                            ) : payments.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="h-32 text-center text-slate-500">
+                                        <div className="flex flex-col items-center justify-center space-y-1">
+                                            <History className="h-8 w-8 text-slate-300 dark:text-slate-700" />
+                                            <p className="text-sm font-medium">No payment history found.</p>
+                                            <p className="text-xs text-slate-400">Your top-up transactions will appear here.</p>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                payments.map((p) => {
+                                    const amountInRupees = (p.amountInPaise / 100).toLocaleString("en-IN", {
+                                        minimumFractionDigits: 0
+                                    });
+                                    const badgeVariant =
+                                        p.status === "paid"
+                                            ? "success"
+                                            : p.status === "created"
+                                            ? "warning"
+                                            : p.status === "failed" || p.status === "cancelled"
+                                            ? "danger"
+                                            : statusToBadgeVariant(p.status);
+
+                                    return (
+                                        <TableRow key={p._id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                            <TableCell className="font-mono text-xs font-semibold text-slate-900 dark:text-white">
+                                                {p.razorpayOrderId}
+                                            </TableCell>
+                                            <TableCell className="font-semibold text-emerald-600 dark:text-emerald-400">
+                                                +{p.credits.toLocaleString()} credits
+                                            </TableCell>
+                                            <TableCell className="font-semibold text-slate-800 dark:text-slate-200">
+                                                ₹{amountInRupees}
+                                            </TableCell>
+                                            <TableCell className="font-mono text-xs text-slate-500">
+                                                {p.razorpayPaymentId ? p.razorpayPaymentId : <span className="text-slate-400 italic">Pending</span>}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant={badgeVariant} className="text-[11px] font-bold capitalize">
+                                                    {p.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right text-xs text-slate-500">
+                                                {moment(p.createdAt).format("DD MMM YYYY, hh:mm A")}
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
         </div>
     );
 }
+
