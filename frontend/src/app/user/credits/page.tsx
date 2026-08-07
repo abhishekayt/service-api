@@ -151,7 +151,6 @@ export default function BuyCreditsPage() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {packs.map((pack, idx) => {
                     const priceInRupees = pack.amountInPaise / 100;
-                    const pricePerCredit = (priceInRupees / pack.credits).toFixed(2);
                     const isPopular = idx === 1 || pack.credits >= 1000;
 
                     return (
@@ -188,9 +187,6 @@ export default function BuyCreditsPage() {
                                         / {pack.credits} credits
                                     </span>
                                 </div>
-                                <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
-                                    ₹{pricePerCredit} per credit
-                                </p>
                             </CardHeader>
 
                             <CardContent className="space-y-4 pt-0">
