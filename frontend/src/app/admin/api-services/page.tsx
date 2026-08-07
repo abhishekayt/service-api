@@ -107,12 +107,15 @@ export default function AdminApiServicesPage() {
         }
 
         result.sort((a, b) => {
-            let valA: string | number = a[sortBy] ?? "";
-            let valB: string | number = b[sortBy] ?? "";
+            let valA: string | number = "";
+            let valB: string | number = "";
 
             if (sortBy === "status") {
                 valA = a.isActive ? 1 : 0;
                 valB = b.isActive ? 1 : 0;
+            } else {
+                valA = a[sortBy] ?? "";
+                valB = b[sortBy] ?? "";
             }
 
             if (typeof valA === "string") {
