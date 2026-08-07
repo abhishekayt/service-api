@@ -10,7 +10,9 @@ const cookieOptions = {
     httpOnly: true,
     sameSite: "lax",
     secure: false,
-    maxAge: 7 * 24 * 60 * 60 * 1000
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    // domain: ".technolite.in"
+
 };
 
 export const userRegister = async (req, res) => {
@@ -100,8 +102,13 @@ export const userProfile = async (req, res) => {
 };
 
 export const userLogout = async (req, res) => {
-    res.clearCookie("user_token");
-    return res.success([], "Logged out");
+    try{
+        res.clearCookie("user_token", cookieOptions);
+        return res.success([], "Logged out");
+    }
+    catch(err){
+        return res.someThingWentWrong(err);
+    }
 };
 
 export const userUpdateProfile = async (req, res) => {

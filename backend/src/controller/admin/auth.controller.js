@@ -8,7 +8,8 @@ const cookieOptions = {
     httpOnly: true,
     sameSite: "lax",
     secure: false,
-    maxAge: 7 * 24 * 60 * 60 * 1000
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    // domain: ".technolite.in"
 };
 
 export const adminLogin = async (req, res) => {
@@ -112,8 +113,13 @@ export const updateAdminProfileImage = async (req, res) => {
 };
 
 export const adminLogout = async (req, res) => {
-    res.clearCookie("admin_token");
-    return res.success([], "Logged out");
+    try{
+        res.clearCookie("admin_token", cookieOptions);
+        return res.success([], "Logged out");
+    }
+    catch (err){
+        return res.someThingWentWrong(err);
+    }
 };
 
 export const createDefaultAdmin = async (req, res) => {
