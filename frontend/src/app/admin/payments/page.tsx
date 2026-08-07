@@ -5,6 +5,8 @@ import moment from "moment";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminPagination from "@/components/admin/AdminPagination";
 import AxiosHelperAdmin from "@/helpers/AxiosHelperAdmin";
+import AdminTableHeader from "@/components/admin/AdminTableHeader";
+import { Badge } from "@/components/ui";
 
 type PaymentRow = {
     _id: string;
@@ -18,8 +20,15 @@ type PaymentRow = {
     creditPackId?: { name?: string } | null;
 };
 
+type SortBy = "userId" | "credits" | "amountInPaise" | "status" | "createdAt";
+type SortOrder = "asc" | "desc";
+
 export default function AdminPaymentsPage() {
-    const [param, setParam] = useState({ pageNo: 1, limit: 20 });
+    const [param, setParam] = useState<{ limit: number; pageNo: number; query: string; sortBy?: SortBy; sortOrder?: SortOrder }>({
+        limit: 20,
+        pageNo: 1,
+        query: ""
+    });
     const [data, setData] = useState<{ count: number; record: PaymentRow[]; totalPages: number; pagination: number[] }>({
         count: 0,
         record: [],
@@ -38,46 +47,67 @@ export default function AdminPaymentsPage() {
 
     return (
         <section className="space-y-4">
-            <AdminPageHeader title="Payments" subtitle="Razorpay credit top-up orders." />
-            <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700">
-                <table className="min-w-full text-left text-sm">
-                    <thead className="bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                        <tr>
-                            <th className="px-4 py-3">User</th>
-                            <th className="px-4 py-3">Pack</th>
-                            <th className="px-4 py-3">Credits</th>
-                            <th className="px-4 py-3">Amount</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Order</th>
-                            <th className="px-4 py-3">When</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.record.map((row) => (
-                            <tr key={row._id} className="border-t border-slate-100 dark:border-slate-800">
-                                <td className="px-4 py-3">
-                                    <p className="font-medium">{row.userId?.name || "—"}</p>
-                                    <p className="text-xs text-slate-500">{row.userId?.email}</p>
-                                </td>
-                                <td className="px-4 py-3">{row.creditPackId?.name || "—"}</td>
-                                <td className="px-4 py-3">{row.credits}</td>
-                                <td className="px-4 py-3">₹{(row.amountInPaise / 100).toFixed(2)}</td>
-                                <td className="px-4 py-3 capitalize">{row.status}</td>
-                                <td className="px-4 py-3 font-mono text-xs">{row.razorpayOrderId}</td>
-                                <td className="px-4 py-3 text-slate-500">{moment(row.createdAt).format("DD MMM YYYY HH:mm")}</td>
-                            </tr>
-                        ))}
-                        {!data.record.length ? (
+            <AdminPageHeader title="Payments" subtitle="Razorpay credit top-up orders ledger." />
+
+            <div className="rounded-2xl border border-indigo-100 bg-white p-4 dark:border-indigo-100 dark:bg-slate-900">
+                <div className="mb-3 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+                    <input
+                        value={param.query}
+                        onChange={(e) => setParam((prev) => ({ ...prev, pageNo: 1, query: e.target.value }))}
+                        data-slot="input"
+                        className="h-9 w-full max-w-xs min-w-0 rounded-md border border-indigo-100 bg-white px-3 py-1 text-sm text-slate-900 shadow-xs outline-none transition-[color,box-shadow] placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:ring-[3px] focus-visible:ring-indigo-200 dark:border-indigo-100 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400"
+                        placeholder="Search order ID, user..."
+                    />
+                    <div className="flex items-center gap-2">
+                        <div className="text-sm text-slate-500 dark:text-slate-400">Total: {data.count}</div>
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                        <thead className="bg-[#edf3ff] text-left text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                             <tr>
-                                <td colSpan={7} className="px-4 py-6 text-center text-slate-500">
-                                    No payments yet.
-                                </td>
+                                <th className="px-3 py-2">User</th>
+                                <th className="px-3 py-2">Pack</th>
+                                <th className="px-3 py-2">Credits</th>
+                                <th className="px-3 py-2">Amount</th>
+                                <th className="px-3 py-2">Status</th>
+                                <th className="px-3 py-2">Order ID</th>
+                                <th className="px-3 py-2">Date</th>
                             </tr>
-                        ) : null}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {data.record.map((row) => (
+                                <tr key={row._id} className="border-t border-indigo-100 dark:border-slate-700">
+                                    <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
+                                        <p className="font-medium text-slate-900 dark:text-slate-100">{row.userId?.name || "—"}</p>
+                                        <p className="text-xs text-slate-500">{row.userId?.email}</p>
+                                    </td>
+                                    <td className="px-3 py-2 text-slate-700 dark:text-slate-200">{row.creditPackId?.name || "—"}</td>
+                                    <td className="px-3 py-2 font-semibold text-emerald-600 dark:text-emerald-400">{row.credits} credits</td>
+                                    <td className="px-3 py-2 font-semibold text-slate-900 dark:text-slate-100">₹{(row.amountInPaise / 100).toFixed(2)}</td>
+                                    <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
+                                        <Badge variant={row.status === "captured" || row.status === "paid" ? "success" : "secondary"} size="sm">
+                                            {row.status}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-3 py-2 font-mono text-xs text-slate-700 dark:text-slate-200">{row.razorpayOrderId}</td>
+                                    <td className="px-3 py-2 text-slate-500">{moment(row.createdAt).format("DD-MM-YYYY HH:mm")}</td>
+                                </tr>
+                            ))}
+                            {!data.record.length ? (
+                                <tr>
+                                    <td colSpan={7} className="px-3 py-6 text-center text-slate-500 dark:text-slate-400">
+                                        No Records Available.
+                                    </td>
+                                </tr>
+                            ) : null}
+                        </tbody>
+                    </table>
+                </div>
+                <AdminPagination data={data} param={param} setParam={setParam} />
             </div>
-            <AdminPagination data={data} param={param} setParam={setParam} />
         </section>
     );
 }
+

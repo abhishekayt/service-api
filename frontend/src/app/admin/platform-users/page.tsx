@@ -70,53 +70,62 @@ export default function AdminPlatformUsersPage() {
     return (
         <section className="space-y-4">
             <AdminPageHeader title="Platform Users" subtitle="Developer accounts, wallets, and manual credit adjustments." />
-            <div className="flex gap-2">
-                <input
-                    value={param.query}
-                    onChange={(e) => setParam((prev) => ({ ...prev, pageNo: 1, query: e.target.value }))}
-                    placeholder="Search name, email, id"
-                    className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900"
-                />
-            </div>
-            <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700">
-                <table className="min-w-full text-left text-sm">
-                    <thead className="bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                        <tr>
-                            <th className="px-4 py-3">User</th>
-                            <th className="px-4 py-3">Email</th>
-                            <th className="px-4 py-3">Balance</th>
-                            <th className="px-4 py-3">Joined</th>
-                            <th className="px-4 py-3" />
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.record.map((user) => (
-                            <tr key={user._id} className="border-t border-slate-100 dark:border-slate-800">
-                                <td className="px-4 py-3">
-                                    <p className="font-medium text-slate-900 dark:text-slate-100">{user.name}</p>
-                                    <p className="text-xs text-slate-500">{user.userId}</p>
-                                </td>
-                                <td className="px-4 py-3">{user.email}</td>
-                                <td className="px-4 py-3 font-semibold">{user.balance}</td>
-                                <td className="px-4 py-3 text-slate-500">{user.createdAt ? moment(user.createdAt).format("DD MMM YYYY") : "—"}</td>
-                                <td className="px-4 py-3 text-right">
-                                    <Button type="button" size="sm" variant="secondary" onClick={() => adjustCredits(user)}>
-                                        Adjust credits
-                                    </Button>
-                                </td>
-                            </tr>
-                        ))}
-                        {!data.record.length ? (
+
+            <div className="rounded-2xl border border-indigo-100 bg-white p-4 dark:border-indigo-100 dark:bg-slate-900">
+                <div className="mb-3 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+                    <input
+                        value={param.query}
+                        onChange={(e) => setParam((prev) => ({ ...prev, pageNo: 1, query: e.target.value }))}
+                        data-slot="input"
+                        className="h-9 w-full max-w-xs min-w-0 rounded-md border border-indigo-100 bg-white px-3 py-1 text-sm text-slate-900 shadow-xs outline-none transition-[color,box-shadow] placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:ring-[3px] focus-visible:ring-indigo-200 dark:border-indigo-100 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400"
+                        placeholder="Search name, email, id..."
+                    />
+                    <div className="flex items-center gap-2">
+                        <div className="text-sm text-slate-500 dark:text-slate-400">Total: {data.count}</div>
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                        <thead className="bg-[#edf3ff] text-left text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                             <tr>
-                                <td colSpan={5} className="px-4 py-6 text-center text-slate-500">
-                                    No users found.
-                                </td>
+                                <th className="px-3 py-2">User</th>
+                                <th className="px-3 py-2">Email</th>
+                                <th className="px-3 py-2">Balance</th>
+                                <th className="px-3 py-2">Joined</th>
+                                <th className="px-3 py-2 text-right">Action</th>
                             </tr>
-                        ) : null}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {data.record.map((user) => (
+                                <tr key={user._id} className="border-t border-indigo-100 dark:border-slate-700">
+                                    <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
+                                        <p className="font-medium text-slate-900 dark:text-slate-100">{user.name}</p>
+                                        <p className="text-xs text-slate-500">{user.userId}</p>
+                                    </td>
+                                    <td className="px-3 py-2 text-slate-700 dark:text-slate-200">{user.email}</td>
+                                    <td className="px-3 py-2 font-semibold text-emerald-600 dark:text-emerald-400">{user.balance} credits</td>
+                                    <td className="px-3 py-2 text-slate-500">{user.createdAt ? moment(user.createdAt).format("DD-MM-YYYY") : "—"}</td>
+                                    <td className="px-3 py-2 text-right">
+                                        <Button type="button" size="sm" variant="secondary" onClick={() => adjustCredits(user)}>
+                                            Adjust credits
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {!data.record.length ? (
+                                <tr>
+                                    <td colSpan={5} className="px-3 py-6 text-center text-slate-500 dark:text-slate-400">
+                                        No Records Available.
+                                    </td>
+                                </tr>
+                            ) : null}
+                        </tbody>
+                    </table>
+                </div>
+                <AdminPagination data={data} param={param} setParam={setParam} />
             </div>
-            <AdminPagination data={data} param={param} setParam={setParam} />
         </section>
     );
 }
+
