@@ -47,15 +47,17 @@ export const adjustUserCredits = async (req, res) => {
 
         await getOrCreateWallet(user._id);
 
+        const source = description.toLowerCase().includes("reward") || description.toLowerCase().includes("bonus") ? "reward" : "admin";
+
         if (amount > 0) {
             const wallet = await creditWallet({
                 userId: user._id,
                 amount,
                 type: "adjustment",
+                source,
                 description,
                 meta: { adminId: req.admin.id }
             });
-            const source = description.toLowerCase().includes("reward") || description.toLowerCase().includes("bonus") ? "reward" : "admin";
             await PaymentOrder.create({
                 userId: user._id,
                 credits: amount,
@@ -75,6 +77,7 @@ export const adjustUserCredits = async (req, res) => {
             const wallet = await debitWallet({
                 userId: user._id,
                 amount: Math.abs(amount),
+                source: "admin",
                 description,
                 meta: { adminId: req.admin.id }
             });

@@ -7,6 +7,7 @@ const Schema = new mongoose.Schema(
         txnId: { type: String, unique: true, sparse: true, index: true, default: null },
         userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
         type: { type: String, required: true, enum: ["topup", "debit", "refund", "adjustment", "signup_bonus"] },
+        source: { type: String, enum: ["self", "admin", "reward", "api_usage", "signup_bonus", "system"], default: "self", index: true },
         amount: { type: Number, required: true },
         balanceAfter: { type: Number, required: true },
         referenceType: { type: String, default: null },

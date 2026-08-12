@@ -7,13 +7,14 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { ArrowLeft, Plus, Wallet } from "lucide-react";
 import AxiosHelperAdmin from "@/helpers/AxiosHelperAdmin";
-import { Button } from "@/components/ui";
+import { Button, Badge, type BadgeVariant } from "@/components/ui";
 import AdminPagination from "@/components/admin/AdminPagination";
 
 type Transaction = {
     _id: string;
     txnId?: string;
     type: string;
+    source?: "self" | "admin" | "reward" | "api_usage" | "signup_bonus" | string;
     amount: number;
     balanceAfter: number;
     description: string;
@@ -143,6 +144,7 @@ export default function PlatformUserLedgerPage() {
                         <thead className="bg-slate-50 text-left text-slate-600 dark:bg-slate-800/50 dark:text-slate-300">
                             <tr>
                                 <th className="px-4 py-3 font-medium">Voucher</th>
+                                <th className="px-4 py-3 font-medium">Source</th>
                                 <th className="px-4 py-3 font-medium">Type</th>
                                 <th className="px-4 py-3 font-medium">Amount</th>
                                 <th className="px-4 py-3 font-medium">Updated Balance</th>
@@ -156,10 +158,34 @@ export default function PlatformUserLedgerPage() {
                                 const isPositive = txn.amount > 0;
                                 const isActuallyCredit = isCredit || (txn.type === "adjustment" && isPositive);
 
+                                const sourceLabel = txn.source === "admin"
+                                    ? "Admin"
+                                    : txn.source === "reward"
+                                    ? "Reward"
+                                    : txn.source === "api_usage"
+                                    ? "API Usage"
+                                    : txn.source === "signup_bonus"
+                                    ? "Bonus"
+                                    : "Self";
+                                const sourceVariant: BadgeVariant = txn.source === "admin"
+                                    ? "secondary"
+                                    : txn.source === "reward"
+                                    ? "warning"
+                                    : txn.source === "api_usage"
+                                    ? "outline"
+                                    : txn.source === "signup_bonus"
+                                    ? "info"
+                                    : "outline";
+
                                 return (
                                     <tr key={txn._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20">
                                         <td className="px-4 py-3 font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">
                                             {txn.txnId || `TR${txn._id.slice(-6).toUpperCase()}`}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <Badge variant={sourceVariant} size="sm" className="capitalize font-semibold">
+                                                {sourceLabel}
+                                            </Badge>
                                         </td>
                                         <td className="px-4 py-3">
                                             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${isActuallyCredit ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}>
@@ -177,7 +203,7 @@ export default function PlatformUserLedgerPage() {
                             })}
                             {!data.transactions.length && (
                                 <tr>
-                                    <td colSpan={6} className="px-4 py-8 text-center text-slate-500">No transactions found.</td>
+                                    <td colSpan={7} className="px-4 py-8 text-center text-slate-500">No transactions found.</td>
                                 </tr>
                             )}
                         </tbody>
