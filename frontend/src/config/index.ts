@@ -89,21 +89,22 @@ export const PERMISSIONS = [
 export const MENU: Array<SidebarItem | SidebarGroup> = [
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, permission_id: true },
     {
-        label: "Platform",
-        icon: Webhook,
-        children: [
-            { href: "/admin/platform-users", label: "Users", icon: Users, permission_id: true },
-            { href: "/admin/api-services", label: "API Services", icon: Package, permission_id: true },
-            { href: "/admin/credit-packs", label: "Credit Packs", icon: Coins, permission_id: true },
-            { href: "/admin/payments", label: "Payments", icon: CreditCard, permission_id: true },
-        ]
-    },
-    {
         label: "User Management",
         icon: Shield,
         children: [
             { href: "/admin/roles", label: "Roles", icon: UserCog, permission_id: 104 },
             { href: "/admin/admins", label: "Sub Admins", icon: Users, permission_id: 204 },
+            { href: "/admin/platform-users", label: "Customers", icon: Users, permission_id: true },
+
+        ]
+    },
+    {
+        label: "Platform",
+        icon: Webhook,
+        children: [
+            { href: "/admin/api-services", label: "API Services", icon: Package, permission_id: true },
+            { href: "/admin/credit-packs", label: "Credit Packs", icon: Coins, permission_id: true },
+            { href: "/admin/payments", label: "Payments", icon: CreditCard, permission_id: true },
         ]
     },
     {

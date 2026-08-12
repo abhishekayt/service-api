@@ -20,7 +20,10 @@ import {
     listUsageAdmin,
     platformStats,
     updateApiServiceAdmin,
-    updateCreditPackAdmin
+    updateCreditPackAdmin,
+    listUserLedger,
+    updateUserStatus,
+    deleteUser
 } from "../controller/admin/platform.controller.js";
 import { Storage } from "../libraries/storage.js";
 
@@ -49,6 +52,9 @@ router.put("/settings/:type", appSettingStorage.any(), validator("setting-update
 // Platform users / credits
 router.get("/platform-users", listPlatformUsers);
 router.post("/platform-users/:id/credits", adjustUserCredits);
+router.get("/platform-users/:id/ledger", listUserLedger);
+router.put("/platform-users/:id/status", updateUserStatus);
+router.delete("/platform-users/:id", deleteUser);
 
 // API services catalog
 router.get("/api-services", listApiServicesAdmin);
