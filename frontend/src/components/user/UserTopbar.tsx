@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Menu, User as UserIcon, Coins, Sparkles, ExternalLink, KeyRound, PanelLeftOpen, PanelLeftClose, BookOpen, Settings } from "lucide-react";
+import { LogOut, Menu, User as UserIcon, Coins, Sparkles, ExternalLink, KeyRound, PanelLeftOpen, PanelLeftClose, BookOpen, Settings, Sun, Moon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import AxiosHelperUser from "@/helpers/AxiosHelperUser";
@@ -14,7 +14,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { toggleMobileSidebarOpen, toggleSidebarCollapsed } from "@/store/slices/appSlice";
+import { toggleMobileSidebarOpen, toggleSidebarCollapsed, toggleTheme } from "@/store/slices/appSlice";
 import { resetUser } from "@/store/slices/userSlice";
 import Link from "next/link";
 
@@ -22,6 +22,7 @@ export default function UserTopbar() {
     const router = useRouter();
     const dispatch = useAppDispatch();
     const user = useAppSelector((state) => state.user);
+    const isDark = useAppSelector((state) => state.app.theme === "dark");
     const isSidebarCollapsed = useAppSelector((state) => state.app.sidebarCollapsed);
 
     const handleLogout = async () => {
@@ -75,6 +76,19 @@ export default function UserTopbar() {
             </div>
 
             <div className="flex items-center gap-3">
+                {/* Theme Switcher */}
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => dispatch(toggleTheme())}
+                    className="rounded-xl border border-slate-200/80 bg-white p-2 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                    title="Toggle theme"
+                    aria-label="Toggle theme"
+                >
+                    {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </Button>
+
                 {/* Quick Action Top Up Pill */}
                 <Link
                     href="/user/credits"
