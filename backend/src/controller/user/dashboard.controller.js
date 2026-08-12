@@ -27,8 +27,8 @@ export const getDashboard = async (req, res) => {
 
 export const listUsage = async (req, res) => {
     try {
-        const { limit, pageNo } = req.query;
-        const skip = (pageNo - 1) * limit;
+        const { limit = 15, pageNo = 1 } = req.query;
+        const skip = (Number(pageNo) - 1) * Number(limit);
         const filter = { userId: req.user.id };
 
         const [count, record] = await Promise.all([
@@ -36,11 +36,11 @@ export const listUsage = async (req, res) => {
             UsageLog.find(filter)
                 .sort({ createdAt: -1 })
                 .skip(skip)
-                .limit(limit)
+                .limit(Number(limit))
                 .select("serviceSlug creditsCharged status errorMessage createdAt latencyMs")
         ]);
 
-        return res.pagination(record, count, limit, pageNo);
+        return res.pagination(record, count, Number(limit), Number(pageNo));
     } catch (error) {
         return res.someThingWentWrong(error);
     }

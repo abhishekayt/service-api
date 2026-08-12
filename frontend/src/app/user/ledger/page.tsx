@@ -162,7 +162,7 @@ export default function UserLedgerPage() {
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent className="p-0">
+                <CardContent className="p-5 md:p-6 pt-0">
                     <Table>
                         <TableHeader>
                             <TableRow>
