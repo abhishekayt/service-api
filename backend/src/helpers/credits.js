@@ -1,14 +1,23 @@
 import mongoose from "mongoose";
 import { CreditLedger, Wallet } from "../models/index.js";
+import { orderId } from "./utils.js";
+import { Counter } from "../models/Counter.js";
 
-export const getOrCreateWallet = async (userId, session = null) => {
-    const options = session ? { session } : {};
-    let wallet = await Wallet.findOne({ userId }, null, options);
-    if (!wallet) {
-        const created = await Wallet.create([{ userId, balance: 0 }], options);
-        wallet = created[0];
+export const ensureCreditLedgerTxnIds = async () => {
+    try {
+        const unassigned = await CreditLedger.find({ $or: [{ txnId: null }, { txnId: { $exists: false } }] }).sort({ createdAt: 1 });
+        for (const doc of unassigned) {
+            const counter = await Counter.findByIdAndUpdate(
+                { _id: "CreditLedger" },
+                { $inc: { seq: 1 } },
+                { upsert: true, new: true }
+            );
+            doc.txnId = orderId(counter.seq, "TXN", 5);
+            await doc.save();
+        }
+    } catch (e) {
+        console.error("Failed to backfill CreditLedger txnId:", e);
     }
-    return wallet;
 };
 
 export const creditWallet = async ({ userId, amount, type, description, referenceType = null, referenceId = null, meta = null, session = null }) => {
@@ -20,21 +29,17 @@ export const creditWallet = async ({ userId, amount, type, description, referenc
         { new: true, upsert: true, setDefaultsOnInsert: true, session }
     );
 
-    await CreditLedger.create(
-        [
-            {
-                userId,
-                type,
-                amount,
-                balanceAfter: wallet.balance,
-                referenceType,
-                referenceId,
-                description,
-                meta
-            }
-        ],
-        { session }
-    );
+    const ledgerDoc = new CreditLedger({
+        userId,
+        type,
+        amount,
+        balanceAfter: wallet.balance,
+        referenceType,
+        referenceId,
+        description,
+        meta
+    });
+    await ledgerDoc.save({ session });
 
     return wallet;
 };
@@ -54,21 +59,17 @@ export const debitWallet = async ({ userId, amount, description, referenceType =
         throw err;
     }
 
-    await CreditLedger.create(
-        [
-            {
-                userId,
-                type: "debit",
-                amount: -amount,
-                balanceAfter: wallet.balance,
-                referenceType,
-                referenceId,
-                description,
-                meta
-            }
-        ],
-        { session }
-    );
+    const ledgerDoc = new CreditLedger({
+        userId,
+        type: "debit",
+        amount: -amount,
+        balanceAfter: wallet.balance,
+        referenceType,
+        referenceId,
+        description,
+        meta
+    });
+    await ledgerDoc.save({ session });
 
     return wallet;
 };
