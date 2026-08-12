@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import moment from "moment";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminPagination from "@/components/admin/AdminPagination";
 import AxiosHelperAdmin from "@/helpers/AxiosHelperAdmin";
@@ -21,6 +22,7 @@ type PlatformUser = {
 };
 
 export default function AdminPlatformUsersPage() {
+    const router = useRouter();
     const [param, setParam] = useState({ pageNo: 1, limit: 10, query: "" });
     const [data, setData] = useState<{ count: number; record: PlatformUser[]; totalPages: number; pagination: number[] }>({
         count: 0,
@@ -38,30 +40,38 @@ export default function AdminPlatformUsersPage() {
         fetchUsers();
     }, [fetchUsers]);
 
-    const adjustCredits = async (user: PlatformUser) => {
-        const result = await Swal.fire({
-            title: `Adjust credits for ${user.name}`,
-            input: "text",
-            inputLabel: "Amount (positive to add, negative to deduct)",
-            inputPlaceholder: "100 or -50",
-            showCancelButton: true,
-            confirmButtonText: "Apply"
-        });
-        if (!result.isConfirmed || !result.value) return;
+    const [updatingUser, setUpdatingUser] = useState<PlatformUser | null>(null);
 
-        const amount = Number(result.value);
-        if (!Number.isFinite(amount) || amount === 0) {
-            toast.error("Enter a non-zero number");
-            return;
-        }
-
-        const { data: res } = await AxiosHelperAdmin.postData(`/platform-users/${user._id}/credits`, {
-            amount,
-            description: "Admin credit adjustment"
+    const handleBlockUnblock = async (user: PlatformUser) => {
+        const { data: res } = await AxiosHelperAdmin.putData(`/platform-users/${user._id}/status`, {
+            isActive: !user.isActive
         });
         if (res?.status) {
             toast.success(res.message);
             fetchUsers();
+            setUpdatingUser(null);
+        } else {
+            toast.error(res?.message || "Failed");
+        }
+    };
+
+    const handleDelete = async (user: PlatformUser) => {
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: "This will delete the user permanently.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete",
+            confirmButtonColor: "#ef4444"
+        });
+
+        if (!result.isConfirmed) return;
+
+        const { data: res } = await AxiosHelperAdmin.deleteData(`/platform-users/${user._id}`);
+        if (res?.status) {
+            toast.success(res.message);
+            fetchUsers();
+            setUpdatingUser(null);
         } else {
             toast.error(res?.message || "Failed");
         }
@@ -107,9 +117,14 @@ export default function AdminPlatformUsersPage() {
                                     <td className="px-3 py-2 font-semibold text-emerald-600 dark:text-emerald-400">{user.balance} credits</td>
                                     <td className="px-3 py-2 text-slate-500">{user.createdAt ? moment(user.createdAt).format("DD-MM-YYYY") : "—"}</td>
                                     <td className="px-3 py-2 text-right">
-                                        <Button type="button" size="sm" variant="secondary" onClick={() => adjustCredits(user)}>
-                                            Adjust credits
-                                        </Button>
+                                        <div className="flex justify-end gap-2">
+                                            <Button type="button" size="sm" variant="secondary" onClick={() => router.push(`/admin/platform-users/${user._id}/ledger`)}>
+                                                Ledger
+                                            </Button>
+                                            <Button type="button" size="sm" variant="outline" onClick={() => setUpdatingUser(user)}>
+                                                Update
+                                            </Button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -125,6 +140,48 @@ export default function AdminPlatformUsersPage() {
                 </div>
                 <AdminPagination data={data} param={param} setParam={setParam} />
             </div>
+
+            {updatingUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                        <div className="mb-4 flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Manage User</h3>
+                            <button onClick={() => setUpdatingUser(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{updatingUser.name}</p>
+                                <p className="text-xs text-slate-500">{updatingUser.email}</p>
+                            </div>
+                            <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
+                                <p className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">Status</p>
+                                <Button
+                                    type="button"
+                                    variant={updatingUser.isActive ? "outline" : "gradient"}
+                                    className="w-full justify-center"
+                                    onClick={() => handleBlockUnblock(updatingUser)}
+                                >
+                                    {updatingUser.isActive ? "Block User" : "Unblock User"}
+                                </Button>
+                                <p className="mt-2 text-xs text-slate-500">
+                                    {updatingUser.isActive ? "Blocking will prevent the user from accessing the platform." : "Unblocking will restore the user's access."}
+                                </p>
+                            </div>
+                            <div className="border-t border-red-100 pt-4 dark:border-red-900/30">
+                                <p className="mb-2 text-sm font-semibold text-red-600 dark:text-red-400">Danger Zone</p>
+                                <Button
+                                    type="button"
+                                    variant="gradient"
+                                    className="w-full justify-center bg-red-500 text-white hover:bg-red-600"
+                                    onClick={() => handleDelete(updatingUser)}
+                                >
+                                    Delete User
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }

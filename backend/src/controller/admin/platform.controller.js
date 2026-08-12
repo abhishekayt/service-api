@@ -246,3 +246,64 @@ export const platformStats = async (req, res) => {
         return res.someThingWentWrong(error);
     }
 };
+
+export const listUserLedger = async (req, res) => {
+    try {
+        const { limit = 10, pageNo = 1 } = req.query;
+        const skip = (pageNo - 1) * limit;
+        const filter = { userId: req.params.id };
+
+        const [count, record] = await Promise.all([
+            CreditLedger.countDocuments(filter),
+            CreditLedger.find(filter)
+                .sort({ createdAt: -1 })
+                .skip(Number(skip))
+                .limit(Number(limit))
+                .lean()
+        ]);
+        
+        const user = await User.findById(req.params.id, "name userId").lean();
+        const wallet = await Wallet.findOne({ userId: req.params.id }).lean();
+
+        return res.success({
+            user: { ...user, balance: wallet?.balance || 0 },
+            transactions: record,
+            count,
+            limit: Number(limit),
+            pageNo: Number(pageNo)
+        });
+    } catch (error) {
+        return res.someThingWentWrong(error);
+    }
+};
+
+export const updateUserStatus = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.noRecords(false, "User not found");
+        
+        if (req.body.isActive !== undefined) {
+            user.isActive = Boolean(req.body.isActive);
+        }
+        await user.save();
+        
+        return res.successUpdate(user, `User ${user.isActive ? 'unblocked' : 'blocked'} successfully`);
+    } catch (error) {
+        return res.someThingWentWrong(error);
+    }
+};
+
+export const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.noRecords(false, "User not found");
+        
+        user.deletedAt = new Date();
+        user.isActive = false;
+        await user.save();
+        
+        return res.successDelete(user, "User deleted successfully");
+    } catch (error) {
+        return res.someThingWentWrong(error);
+    }
+};
