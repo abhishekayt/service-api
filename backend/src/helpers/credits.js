@@ -3,6 +3,16 @@ import { CreditLedger, Wallet } from "../models/index.js";
 import { orderId } from "./utils.js";
 import { Counter } from "../models/Counter.js";
 
+export const getOrCreateWallet = async (userId, session = null) => {
+    const options = session ? { session } : {};
+    let wallet = await Wallet.findOne({ userId }, null, options);
+    if (!wallet) {
+        const created = await Wallet.create([{ userId, balance: 0 }], options);
+        wallet = created[0];
+    }
+    return wallet;
+};
+
 export const ensureCreditLedgerTxnIds = async () => {
     try {
         const unassigned = await CreditLedger.find({ $or: [{ txnId: null }, { txnId: { $exists: false } }] }).sort({ createdAt: 1 });
