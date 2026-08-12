@@ -23,6 +23,9 @@ type CreditPack = {
 type PaymentItem = {
     _id: string;
     credits: number;
+    baseAmountInPaise?: number;
+    gstPercent?: number;
+    gstAmountInPaise?: number;
     amountInPaise: number;
     currency: string;
     razorpayOrderId: string;
@@ -54,6 +57,7 @@ export default function BuyCreditsPage() {
     const dispatch = useAppDispatch();
     const user = useAppSelector((state) => state.user);
     const [packs, setPacks] = useState<CreditPack[]>([]);
+    const [gstPercent, setGstPercent] = useState<number>(18);
     const [buyingId, setBuyingId] = useState<string | null>(null);
     const [payments, setPayments] = useState<PaymentItem[]>([]);
     const [loadingPayments, setLoadingPayments] = useState<boolean>(true);
@@ -73,7 +77,14 @@ export default function BuyCreditsPage() {
     useEffect(() => {
         (async () => {
             const { data } = await AxiosHelperUser.getData("/credit-packs");
-            if (data?.status) setPacks(data.data || []);
+            if (data?.status) {
+                if (Array.isArray(data.data)) {
+                    setPacks(data.data);
+                } else if (data.data?.packs) {
+                    setPacks(data.data.packs || []);
+                    if (data.data.gstPercent != null) setGstPercent(Number(data.data.gstPercent));
+                }
+            }
         })();
         fetchPayments();
     }, [fetchPayments]);
@@ -99,7 +110,7 @@ export default function BuyCreditsPage() {
                 amount: order.amount,
                 currency: order.currency,
                 name: "Service API Credits",
-                description: `${order.packName} · ${order.credits} credits`,
+                description: `${order.packName} · ${order.credits} credits (+ ${order.gstPercent}% GST)`,
                 order_id: order.orderId,
                 prefill: { name: user.name, email: user.email },
                 handler: async (response: {
@@ -135,7 +146,7 @@ export default function BuyCreditsPage() {
                         Credit Packs & Top-Up
                     </h1>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Purchase non-expiring credits to power your SMS and Email API requests.
+                        Purchase non-expiring credits to power your SMS and Email API requests. (Applicable GST: {gstPercent}%)
                     </p>
                 </div>
                 
@@ -150,7 +161,9 @@ export default function BuyCreditsPage() {
             {/* Credit Packs Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {packs.map((pack, idx) => {
-                    const priceInRupees = pack.amountInPaise / 100;
+                    const basePriceRupees = pack.amountInPaise / 100;
+                    const gstAmountRupees = Math.round(basePriceRupees * (gstPercent / 100));
+                    const totalPayableRupees = basePriceRupees + gstAmountRupees;
                     const isPopular = idx === 1 || pack.credits >= 1000;
 
                     return (
@@ -179,13 +192,18 @@ export default function BuyCreditsPage() {
                                 </div>
                                 <CardDescription>Instant credit addition</CardDescription>
 
-                                <div className="mt-4 flex items-baseline gap-1">
-                                    <span className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-                                        ₹{priceInRupees.toLocaleString()}
-                                    </span>
-                                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                        / {pack.credits} credits
-                                    </span>
+                                <div className="mt-4 space-y-1">
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                                            ₹{totalPayableRupees.toLocaleString()}
+                                        </span>
+                                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                            / {pack.credits} credits
+                                        </span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                                        Pack Price ₹{basePriceRupees.toLocaleString()} + {gstPercent}% GST (₹{gstAmountRupees.toLocaleString()})
+                                    </p>
                                 </div>
                             </CardHeader>
 
@@ -201,7 +219,7 @@ export default function BuyCreditsPage() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                                        <span>Instant Razorpay Checkout</span>
+                                        <span>Includes GST Tax Invoice</span>
                                     </div>
                                 </div>
 

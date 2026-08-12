@@ -2,12 +2,17 @@ import { CreditPack, PaymentOrder } from "../../models/index.js";
 import { creditWallet } from "../../helpers/credits.js";
 import { getRazorpayClient, getRazorpayCredentials, verifyPaymentSignature, verifyWebhookSignature } from "../../helpers/razorpay.js";
 import { ensureDefaultCreditPacks } from "../../helpers/seedCreditPacks.js";
+import { getSettingsMap } from "../../helpers/settings.js";
 
 export const listCreditPacks = async (req, res) => {
     try {
         await ensureDefaultCreditPacks();
-        const packs = await CreditPack.find({ deletedAt: null, isActive: true }).sort({ sortOrder: 1, credits: 1 });
-        return res.success(packs);
+        const [packs, paymentSettings] = await Promise.all([
+            CreditPack.find({ deletedAt: null, isActive: true }).sort({ sortOrder: 1, credits: 1 }),
+            getSettingsMap(4)
+        ]);
+        const gstPercent = Math.max(0, Number(paymentSettings.gst_percent ?? 18));
+        return res.success({ packs, gstPercent });
     } catch (error) {
         return res.someThingWentWrong(error);
     }
@@ -21,15 +26,23 @@ export const createPaymentOrder = async (req, res) => {
         const pack = await CreditPack.findOne({ _id: packId, deletedAt: null, isActive: true });
         if (!pack) return res.noRecords(false, "Credit pack not found");
 
+        const paymentSettings = await getSettingsMap(4);
+        const gstPercent = Math.max(0, Number(paymentSettings.gst_percent ?? 18));
+
+        const baseAmountInPaise = pack.amountInPaise;
+        const gstAmountInPaise = Math.round(baseAmountInPaise * (gstPercent / 100));
+        const totalAmountInPaise = baseAmountInPaise + gstAmountInPaise;
+
         const { client, keyId } = await getRazorpayClient();
         const order = await client.orders.create({
-            amount: pack.amountInPaise,
+            amount: totalAmountInPaise,
             currency: pack.currency || "INR",
             receipt: `pack_${pack._id}_${Date.now()}`.slice(0, 40),
             notes: {
                 userId: String(req.user.id),
                 creditPackId: String(pack._id),
-                credits: String(pack.credits)
+                credits: String(pack.credits),
+                gstPercent: String(gstPercent)
             }
         });
 
@@ -37,7 +50,10 @@ export const createPaymentOrder = async (req, res) => {
             userId: req.user.id,
             creditPackId: pack._id,
             credits: pack.credits,
-            amountInPaise: pack.amountInPaise,
+            baseAmountInPaise,
+            gstPercent,
+            gstAmountInPaise,
+            amountInPaise: totalAmountInPaise,
             currency: pack.currency || "INR",
             razorpayOrderId: order.id,
             status: "created",
@@ -52,7 +68,10 @@ export const createPaymentOrder = async (req, res) => {
                 keyId,
                 paymentOrderId: paymentOrder._id,
                 credits: pack.credits,
-                packName: pack.name
+                packName: pack.name,
+                baseAmountInPaise,
+                gstPercent,
+                gstAmountInPaise
             },
             "Payment order created"
         );

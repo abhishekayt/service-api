@@ -4,7 +4,7 @@ const TYPE_REQUIRED_FIELDS = {
     1: ["application_name", "copyright", "address", "email", "phone"],
     2: ["facebook", "twitter", "linkdin", "instagram"],
     3: ["email_from", "smtp_host", "smtp_port", "smtp_user", "smtp_pass"],
-    4: ["razorpay_key", "razorpay_secret", "merchant_id"],
+    4: ["razorpay_key", "razorpay_secret", "merchant_id", "gst_percent"],
     5: ["sms_key", "sms_url", "sms_hash", "sms_sender"],
     6: ["force_update_android", "force_update_ios", "app_version_android", "app_version_ios", "app_url_android", "app_url_ios", "force_update_message_android", "force_update_message_ios", "maintenance", "maintenance_toggle", "information_banner_toggle"]
 };
@@ -32,6 +32,7 @@ export const seedSettings = async (req, res) => {
             [4, "razorpay_key", "Razor Key", "text", "change_me_razorpay_key"],
             [4, "razorpay_secret", "Razor Secret", "text", "change_me_razorpay_secret"],
             [4, "merchant_id", "Razor Merchant Id", "text", "Nothing"],
+            [4, "gst_percent", "GST Rate (%)", "number", "18"],
             [5, "sms_key", "TextLocal Key", "text", "change_me_sms_key"],
             [5, "sms_url", "TextLocal URL", "text", "https://api.textlocal.in/send/"],
             [5, "sms_hash", "TextLocal Hash", "text", "change_me_sms_hash"],

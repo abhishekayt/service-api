@@ -11,6 +11,9 @@ import { Badge } from "@/components/ui";
 type PaymentRow = {
     _id: string;
     credits: number;
+    baseAmountInPaise?: number;
+    gstPercent?: number;
+    gstAmountInPaise?: number;
     amountInPaise: number;
     status: string;
     razorpayOrderId: string;
@@ -70,31 +73,42 @@ export default function AdminPaymentsPage() {
                                 <th className="px-3 py-2">User</th>
                                 <th className="px-3 py-2">Pack</th>
                                 <th className="px-3 py-2">Credits</th>
-                                <th className="px-3 py-2">Amount</th>
+                                <th className="px-3 py-2">Amount (Base + GST)</th>
                                 <th className="px-3 py-2">Status</th>
                                 <th className="px-3 py-2">Order ID</th>
                                 <th className="px-3 py-2">Date</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {data.record.map((row) => (
-                                <tr key={row._id} className="border-t border-indigo-100 dark:border-slate-700">
-                                    <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
-                                        <p className="font-medium text-slate-900 dark:text-slate-100">{row.userId?.name || "—"}</p>
-                                        <p className="text-xs text-slate-500">{row.userId?.email}</p>
-                                    </td>
-                                    <td className="px-3 py-2 text-slate-700 dark:text-slate-200">{row.creditPackId?.name || "—"}</td>
-                                    <td className="px-3 py-2 font-semibold text-emerald-600 dark:text-emerald-400">{row.credits} credits</td>
-                                    <td className="px-3 py-2 font-semibold text-slate-900 dark:text-slate-100">₹{(row.amountInPaise / 100).toFixed(2)}</td>
-                                    <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
-                                        <Badge variant={row.status === "captured" || row.status === "paid" ? "success" : "secondary"} size="sm">
-                                            {row.status}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-3 py-2 font-mono text-xs text-slate-700 dark:text-slate-200">{row.razorpayOrderId}</td>
-                                    <td className="px-3 py-2 text-slate-500">{moment(row.createdAt).format("DD-MM-YYYY HH:mm")}</td>
-                                </tr>
-                            ))}
+                            {data.record.map((row) => {
+                                const totalRupees = (row.amountInPaise / 100).toFixed(2);
+                                const baseRupees = row.baseAmountInPaise != null ? (row.baseAmountInPaise / 100).toFixed(2) : null;
+                                const gstRupees = row.gstAmountInPaise != null ? (row.gstAmountInPaise / 100).toFixed(2) : null;
+
+                                return (
+                                    <tr key={row._id} className="border-t border-indigo-100 dark:border-slate-700">
+                                        <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
+                                            <p className="font-medium text-slate-900 dark:text-slate-100">{row.userId?.name || "—"}</p>
+                                            <p className="text-xs text-slate-500">{row.userId?.email}</p>
+                                        </td>
+                                        <td className="px-3 py-2 text-slate-700 dark:text-slate-200">{row.creditPackId?.name || "—"}</td>
+                                        <td className="px-3 py-2 font-semibold text-emerald-600 dark:text-emerald-400">{row.credits} credits</td>
+                                        <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
+                                            <p className="font-semibold text-slate-900 dark:text-slate-100">₹{totalRupees}</p>
+                                            {baseRupees && gstRupees ? (
+                                                <p className="text-[11px] text-slate-500">₹{baseRupees} + {row.gstPercent ?? 18}% GST (₹{gstRupees})</p>
+                                            ) : null}
+                                        </td>
+                                        <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
+                                            <Badge variant={row.status === "captured" || row.status === "paid" ? "success" : "secondary"} size="sm">
+                                                {row.status}
+                                            </Badge>
+                                        </td>
+                                        <td className="px-3 py-2 font-mono text-xs text-slate-700 dark:text-slate-200">{row.razorpayOrderId}</td>
+                                        <td className="px-3 py-2 text-slate-500">{moment(row.createdAt).format("DD-MM-YYYY HH:mm")}</td>
+                                    </tr>
+                                );
+                            })}
                             {!data.record.length ? (
                                 <tr>
                                     <td colSpan={7} className="px-3 py-6 text-center text-slate-500 dark:text-slate-400">
