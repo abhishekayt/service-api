@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui";
 
 type PaymentRow = {
     _id: string;
+    paymentId?: string;
     credits: number;
     baseAmountInPaise?: number;
     gstPercent?: number;
@@ -59,7 +60,7 @@ export default function AdminPaymentsPage() {
                         onChange={(e) => setParam((prev) => ({ ...prev, pageNo: 1, query: e.target.value }))}
                         data-slot="input"
                         className="h-9 w-full max-w-xs min-w-0 rounded-md border border-indigo-100 bg-white px-3 py-1 text-sm text-slate-900 shadow-xs outline-none transition-[color,box-shadow] placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:ring-[3px] focus-visible:ring-indigo-200 dark:border-indigo-100 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400"
-                        placeholder="Search order ID, user..."
+                        placeholder="Search payment ID, order ID, user..."
                     />
                     <div className="flex items-center gap-2">
                         <div className="text-sm text-slate-500 dark:text-slate-400">Total: {data.count}</div>
@@ -70,12 +71,12 @@ export default function AdminPaymentsPage() {
                     <table className="min-w-full text-sm">
                         <thead className="bg-[#edf3ff] text-left text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                             <tr>
+                                <th className="px-3 py-2">Payment ID</th>
                                 <th className="px-3 py-2">User</th>
                                 <th className="px-3 py-2">Pack</th>
                                 <th className="px-3 py-2">Credits</th>
                                 <th className="px-3 py-2">Amount (Base + GST)</th>
                                 <th className="px-3 py-2">Status</th>
-                                <th className="px-3 py-2">Order ID</th>
                                 <th className="px-3 py-2">Date</th>
                             </tr>
                         </thead>
@@ -87,6 +88,9 @@ export default function AdminPaymentsPage() {
 
                                 return (
                                     <tr key={row._id} className="border-t border-indigo-100 dark:border-slate-700">
+                                        <td className="px-3 py-2 font-mono text-xs text-slate-700 dark:text-slate-200">
+                                            {row.paymentId || row.razorpayOrderId}
+                                        </td>
                                         <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
                                             <p className="font-medium text-slate-900 dark:text-slate-100">{row.userId?.name || "—"}</p>
                                             <p className="text-xs text-slate-500">{row.userId?.email}</p>
@@ -104,7 +108,6 @@ export default function AdminPaymentsPage() {
                                                 {row.status}
                                             </Badge>
                                         </td>
-                                        <td className="px-3 py-2 font-mono text-xs text-slate-700 dark:text-slate-200">{row.razorpayOrderId}</td>
                                         <td className="px-3 py-2 text-slate-500">{moment(row.createdAt).format("DD-MM-YYYY HH:mm")}</td>
                                     </tr>
                                 );

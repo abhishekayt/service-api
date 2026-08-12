@@ -22,6 +22,7 @@ type CreditPack = {
 
 type PaymentItem = {
     _id: string;
+    paymentId?: string;
     credits: number;
     baseAmountInPaise?: number;
     gstPercent?: number;
@@ -306,7 +307,7 @@ export default function BuyCreditsPage() {
                                     return (
                                         <TableRow key={p._id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                             <TableCell className="font-mono text-xs font-semibold text-slate-900 dark:text-white">
-                                                {p.razorpayOrderId}
+                                                {p.paymentId || p.razorpayOrderId}
                                             </TableCell>
                                             <TableCell className="font-semibold text-emerald-600 dark:text-emerald-400">
                                                 +{p.credits.toLocaleString()} credits

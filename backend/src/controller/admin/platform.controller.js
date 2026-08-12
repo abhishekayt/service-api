@@ -171,7 +171,10 @@ export const listPaymentsAdmin = async (req, res) => {
         const { limit, pageNo, query } = req.query;
         const skip = (pageNo - 1) * limit;
         const filter = {};
-        if (query) filter.razorpayOrderId = { $regex: escapeRegex(query), $options: "i" };
+        if (query) {
+            const rx = { $regex: escapeRegex(query), $options: "i" };
+            filter.$or = [{ paymentId: rx }, { razorpayOrderId: rx }, { razorpayPaymentId: rx }];
+        }
 
         const [count, record] = await Promise.all([
             PaymentOrder.countDocuments(filter),
