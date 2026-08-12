@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 import { CreditLedger, Wallet } from "../models/index.js";
-import { orderId } from "./utils.js";
-import { Counter } from "../models/Counter.js";
 
 export const getOrCreateWallet = async (userId, session = null) => {
     const options = session ? { session } : {};
@@ -11,23 +9,6 @@ export const getOrCreateWallet = async (userId, session = null) => {
         wallet = created[0];
     }
     return wallet;
-};
-
-export const ensureCreditLedgerTxnIds = async () => {
-    try {
-        const unassigned = await CreditLedger.find({ $or: [{ txnId: null }, { txnId: { $exists: false } }] }).sort({ createdAt: 1 });
-        for (const doc of unassigned) {
-            const counter = await Counter.findByIdAndUpdate(
-                { _id: "CreditLedger" },
-                { $inc: { seq: 1 } },
-                { upsert: true, new: true }
-            );
-            doc.txnId = orderId(counter.seq, "TXN", 5);
-            await doc.save();
-        }
-    } catch (e) {
-        console.error("Failed to backfill CreditLedger txnId:", e);
-    }
 };
 
 export const creditWallet = async ({ userId, amount, type, description, referenceType = null, referenceId = null, meta = null, session = null }) => {

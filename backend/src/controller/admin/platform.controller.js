@@ -1,5 +1,5 @@
 import { ApiKey, ApiService, CreditLedger, CreditPack, PaymentOrder, UsageLog, User, Wallet } from "../../models/index.js";
-import { creditWallet, debitWallet, getOrCreateWallet, ensureCreditLedgerTxnIds } from "../../helpers/credits.js";
+import { creditWallet, debitWallet, getOrCreateWallet } from "../../helpers/credits.js";
 import { escapeRegex } from "../../helpers/utils.js";
 import { ensureDefaultApiServices } from "../../helpers/seedServices.js";
 import { ensureDefaultCreditPacks } from "../../helpers/seedCreditPacks.js";
@@ -249,7 +249,6 @@ export const platformStats = async (req, res) => {
 
 export const listUserLedger = async (req, res) => {
     try {
-        await ensureCreditLedgerTxnIds();
         const { limit = 10, pageNo = 1 } = req.query;
         const skip = (pageNo - 1) * limit;
         const filter = { userId: req.params.id };

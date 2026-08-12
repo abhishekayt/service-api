@@ -1,9 +1,8 @@
 import { CreditLedger, UsageLog } from "../../models/index.js";
-import { getOrCreateWallet, ensureCreditLedgerTxnIds } from "../../helpers/credits.js";
+import { getOrCreateWallet } from "../../helpers/credits.js";
 
 export const getDashboard = async (req, res) => {
     try {
-        await ensureCreditLedgerTxnIds();
         const wallet = await getOrCreateWallet(req.user.id);
         const recentUsage = await UsageLog.find({ userId: req.user.id })
             .sort({ createdAt: -1 })
