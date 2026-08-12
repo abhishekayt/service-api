@@ -12,6 +12,7 @@ import AdminPagination from "@/components/admin/AdminPagination";
 
 type Transaction = {
     _id: string;
+    txnId?: string;
     type: string;
     amount: number;
     balanceAfter: number;
@@ -157,7 +158,9 @@ export default function PlatformUserLedgerPage() {
 
                                 return (
                                     <tr key={txn._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20">
-                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400">TR{txn._id.slice(-6).toUpperCase()}</td>
+                                        <td className="px-4 py-3 font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                                            {txn.txnId || `TR${txn._id.slice(-6).toUpperCase()}`}
+                                        </td>
                                         <td className="px-4 py-3">
                                             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${isActuallyCredit ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}>
                                                 {isActuallyCredit ? "Credit" : "Debit"}
