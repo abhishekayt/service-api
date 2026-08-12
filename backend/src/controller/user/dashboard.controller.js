@@ -12,7 +12,7 @@ export const getDashboard = async (req, res) => {
         const recentLedger = await CreditLedger.find({ userId: req.user.id })
             .sort({ createdAt: -1 })
             .limit(10)
-            .select("type amount balanceAfter description createdAt");
+            .select("txnId type amount balanceAfter description createdAt");
 
         return res.success({
             balance: wallet.balance,

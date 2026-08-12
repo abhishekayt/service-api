@@ -35,6 +35,7 @@ type UsageItem = {
 
 type LedgerItem = {
     _id: string;
+    txnId?: string;
     type: string;
     amount: number;
     balanceAfter: number;
@@ -330,9 +331,16 @@ export default function UserDashboardPage() {
                                         className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/60 p-3 text-sm transition-colors hover:bg-slate-100/80 dark:border-slate-800/80 dark:bg-slate-800/40 dark:hover:bg-slate-800/70"
                                     >
                                         <div>
-                                            <p className="font-semibold text-slate-900 dark:text-white capitalize text-xs">
-                                                {item.type.replace(/_/g, " ")}
-                                            </p>
+                                            <div className="flex items-center gap-2">
+                                                {item.txnId ? (
+                                                    <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                                                        {item.txnId}
+                                                    </span>
+                                                ) : null}
+                                                <p className="font-semibold text-slate-900 dark:text-white capitalize text-xs">
+                                                    {item.type.replace(/_/g, " ")}
+                                                </p>
+                                            </div>
                                             <p className="text-[11px] text-slate-500 dark:text-slate-400">
                                                 {item.description || moment(item.createdAt).fromNow()}
                                             </p>
