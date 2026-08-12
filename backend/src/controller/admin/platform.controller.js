@@ -55,6 +55,19 @@ export const adjustUserCredits = async (req, res) => {
                 description,
                 meta: { adminId: req.admin.id }
             });
+            const source = description.toLowerCase().includes("reward") || description.toLowerCase().includes("bonus") ? "reward" : "admin";
+            await PaymentOrder.create({
+                userId: user._id,
+                credits: amount,
+                baseAmountInPaise: 0,
+                gstPercent: 0,
+                gstAmountInPaise: 0,
+                amountInPaise: 0,
+                currency: "INR",
+                source,
+                status: "paid",
+                meta: { description, adminId: req.admin.id }
+            });
             return res.successUpdate({ userId: user._id, balance: wallet.balance }, "Credits added");
         }
 

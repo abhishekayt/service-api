@@ -6,7 +6,7 @@ import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminPagination from "@/components/admin/AdminPagination";
 import AxiosHelperAdmin from "@/helpers/AxiosHelperAdmin";
 import AdminTableHeader from "@/components/admin/AdminTableHeader";
-import { Badge } from "@/components/ui";
+import { Badge, type BadgeVariant } from "@/components/ui";
 
 type PaymentRow = {
     _id: string;
@@ -17,7 +17,8 @@ type PaymentRow = {
     gstAmountInPaise?: number;
     amountInPaise: number;
     status: string;
-    razorpayOrderId: string;
+    source?: "self" | "admin" | "reward" | string;
+    razorpayOrderId?: string | null;
     razorpayPaymentId?: string | null;
     createdAt: string;
     userId?: { name?: string; email?: string; userId?: string } | null;
@@ -73,6 +74,7 @@ export default function AdminPaymentsPage() {
                             <tr>
                                 <th className="px-3 py-2">Payment ID</th>
                                 <th className="px-3 py-2">User</th>
+                                <th className="px-3 py-2">Source</th>
                                 <th className="px-3 py-2">Pack</th>
                                 <th className="px-3 py-2">Credits</th>
                                 <th className="px-3 py-2">Amount (Base + GST)</th>
@@ -85,15 +87,24 @@ export default function AdminPaymentsPage() {
                                 const totalRupees = (row.amountInPaise / 100).toFixed(2);
                                 const baseRupees = row.baseAmountInPaise != null ? (row.baseAmountInPaise / 100).toFixed(2) : null;
                                 const gstRupees = row.gstAmountInPaise != null ? (row.gstAmountInPaise / 100).toFixed(2) : null;
+                                const sourceLabel = row.source === "admin" ? "Admin" : row.source === "reward" ? "Reward" : "Self";
+                                const sourceVariant: BadgeVariant = row.source === "admin" ? "secondary" : row.source === "reward" ? "warning" : "outline";
+                                const statusLabel = row.status === "created" ? "Pending" : row.status;
+                                const statusVariant: BadgeVariant = row.status === "captured" || row.status === "paid" ? "success" : row.status === "created" ? "warning" : "secondary";
 
                                 return (
                                     <tr key={row._id} className="border-t border-indigo-100 dark:border-slate-700">
                                         <td className="px-3 py-2 font-mono text-xs text-slate-700 dark:text-slate-200">
-                                            {row.paymentId || row.razorpayOrderId}
+                                            {row.paymentId || row.razorpayOrderId || "—"}
                                         </td>
                                         <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
                                             <p className="font-medium text-slate-900 dark:text-slate-100">{row.userId?.name || "—"}</p>
                                             <p className="text-xs text-slate-500">{row.userId?.email}</p>
+                                        </td>
+                                        <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
+                                            <Badge variant={sourceVariant} size="sm" className="capitalize font-semibold">
+                                                {sourceLabel}
+                                            </Badge>
                                         </td>
                                         <td className="px-3 py-2 text-slate-700 dark:text-slate-200">{row.creditPackId?.name || "—"}</td>
                                         <td className="px-3 py-2 font-semibold text-emerald-600 dark:text-emerald-400">{row.credits} credits</td>
@@ -104,8 +115,8 @@ export default function AdminPaymentsPage() {
                                             ) : null}
                                         </td>
                                         <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
-                                            <Badge variant={row.status === "captured" || row.status === "paid" ? "success" : "secondary"} size="sm">
-                                                {row.status}
+                                            <Badge variant={statusVariant} size="sm" className="capitalize font-semibold">
+                                                {statusLabel}
                                             </Badge>
                                         </td>
                                         <td className="px-3 py-2 text-slate-500">{moment(row.createdAt).format("DD-MM-YYYY HH:mm")}</td>

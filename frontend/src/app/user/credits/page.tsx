@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { Coins, Zap, CheckCircle2, ArrowRight, Receipt, History } from "lucide-react";
 import AxiosHelperUser from "@/helpers/AxiosHelperUser";
 import { Button } from "@/components/ui/Button";
-import { Badge, statusToBadgeVariant } from "@/components/ui/Badge";
+import { Badge, statusToBadgeVariant, type BadgeVariant } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -29,7 +29,8 @@ type PaymentItem = {
     gstAmountInPaise?: number;
     amountInPaise: number;
     currency: string;
-    razorpayOrderId: string;
+    source?: "self" | "admin" | "reward" | string;
+    razorpayOrderId?: string | null;
     razorpayPaymentId?: string | null;
     status: "created" | "paid" | "failed" | "cancelled" | string;
     createdAt: string;
@@ -266,9 +267,9 @@ export default function BuyCreditsPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Order Reference</TableHead>
+                                <TableHead>Source</TableHead>
                                 <TableHead>Credits</TableHead>
                                 <TableHead>Amount</TableHead>
-                                <TableHead>Payment ID</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-right">Date & Time</TableHead>
                             </TableRow>
@@ -304,10 +305,18 @@ export default function BuyCreditsPage() {
                                             ? "danger"
                                             : statusToBadgeVariant(p.status);
 
+                                    const sourceLabel = p.source === "admin" ? "Admin" : p.source === "reward" ? "Reward" : "Self";
+                                    const sourceBadgeVariant: BadgeVariant = p.source === "admin" ? "secondary" : p.source === "reward" ? "warning" : "outline";
+
                                     return (
                                         <TableRow key={p._id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                             <TableCell className="font-mono text-xs font-semibold text-slate-900 dark:text-white">
-                                                {p.paymentId || p.razorpayOrderId}
+                                                {p.paymentId || p.razorpayOrderId || "—"}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant={sourceBadgeVariant} className="text-[11px] font-bold capitalize">
+                                                    {sourceLabel}
+                                                </Badge>
                                             </TableCell>
                                             <TableCell className="font-semibold text-emerald-600 dark:text-emerald-400">
                                                 +{p.credits.toLocaleString()} credits
@@ -315,12 +324,9 @@ export default function BuyCreditsPage() {
                                             <TableCell className="font-semibold text-slate-800 dark:text-slate-200">
                                                 ₹{amountInRupees}
                                             </TableCell>
-                                            <TableCell className="font-mono text-xs text-slate-500">
-                                                {p.razorpayPaymentId ? p.razorpayPaymentId : <span className="text-slate-400 italic">Pending</span>}
-                                            </TableCell>
                                             <TableCell>
                                                 <Badge variant={badgeVariant} className="text-[11px] font-bold capitalize">
-                                                    {p.status}
+                                                    {p.status === "created" ? "Pending" : p.status}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-right text-xs text-slate-500">

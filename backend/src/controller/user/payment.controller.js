@@ -55,6 +55,7 @@ export const createPaymentOrder = async (req, res) => {
             gstAmountInPaise,
             amountInPaise: totalAmountInPaise,
             currency: pack.currency || "INR",
+            source: "self",
             razorpayOrderId: order.id,
             status: "created",
             meta: { receipt: order.receipt }
