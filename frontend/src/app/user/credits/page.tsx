@@ -110,7 +110,7 @@ export default function BuyCreditsPage() {
                 amount: order.amount,
                 currency: order.currency,
                 name: "Service API Credits",
-                description: `${order.packName} · ${order.credits} credits (+ ${order.gstPercent}% GST)`,
+                description: `${order.packName} · ${order.credits} credits (Incl. GST)`,
                 order_id: order.orderId,
                 prefill: { name: user.name, email: user.email },
                 handler: async (response: {
@@ -146,7 +146,7 @@ export default function BuyCreditsPage() {
                         Credit Packs & Top-Up
                     </h1>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Purchase non-expiring credits to power your SMS and Email API requests. (Applicable GST: {gstPercent}%)
+                        Purchase non-expiring credits to power your SMS and Email API requests.
                     </p>
                 </div>
                 
@@ -162,8 +162,6 @@ export default function BuyCreditsPage() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {packs.map((pack, idx) => {
                     const basePriceRupees = pack.amountInPaise / 100;
-                    const gstAmountRupees = Math.round(basePriceRupees * (gstPercent / 100));
-                    const totalPayableRupees = basePriceRupees + gstAmountRupees;
                     const isPopular = idx === 1 || pack.credits >= 1000;
 
                     return (
@@ -192,18 +190,13 @@ export default function BuyCreditsPage() {
                                 </div>
                                 <CardDescription>Instant credit addition</CardDescription>
 
-                                <div className="mt-4 space-y-1">
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                                            ₹{totalPayableRupees.toLocaleString()}
-                                        </span>
-                                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                            / {pack.credits} credits
-                                        </span>
-                                    </div>
-                                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                                        Pack Price ₹{basePriceRupees.toLocaleString()} + {gstPercent}% GST (₹{gstAmountRupees.toLocaleString()})
-                                    </p>
+                                <div className="mt-4 flex items-baseline gap-1">
+                                    <span className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+                                        ₹{basePriceRupees.toLocaleString()}
+                                    </span>
+                                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                        + GST / {pack.credits} credits
+                                    </span>
                                 </div>
                             </CardHeader>
 
