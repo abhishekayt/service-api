@@ -255,7 +255,7 @@ export default function UserLedgerPage() {
                     </Table>
 
                     {/* Pagination Bar */}
-                    {totalPages > 1 && (
+                    {data.count > 0 && (
                         <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3 dark:border-slate-800">
                             <p className="text-xs text-slate-500 dark:text-slate-400">
                                 Page <span className="font-semibold">{param.pageNo}</span> of{" "}
