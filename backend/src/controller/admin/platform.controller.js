@@ -3,6 +3,7 @@ import { creditWallet, debitWallet, getOrCreateWallet } from "../../helpers/cred
 import { escapeRegex } from "../../helpers/utils.js";
 import { ensureDefaultApiServices } from "../../helpers/seedServices.js";
 import { ensureDefaultCreditPacks } from "../../helpers/seedCreditPacks.js";
+import { getRazorpayClient } from "../../helpers/razorpay.js";
 
 export const listPlatformUsers = async (req, res) => {
     try {
@@ -338,6 +339,38 @@ export const deleteUser = async (req, res) => {
         await user.save();
         
         return res.successDelete(user, "User deleted successfully");
+    } catch (error) {
+        return res.someThingWentWrong(error);
+    }
+};
+
+export const getPaymentRazorpayDetails = async (req, res) => {
+    try {
+        const order = await PaymentOrder.findById(req.params.id);
+        if (!order) return res.noRecords(false, "Payment order not found");
+
+        let razorpayDetails = null;
+
+        if (order.razorpayPaymentId) {
+            try {
+                const { client } = await getRazorpayClient();
+                razorpayDetails = await client.payments.fetch(order.razorpayPaymentId);
+            } catch (err) {
+                console.error("Error fetching razorpay payment details:", err);
+            }
+        } else if (order.razorpayOrderId) {
+             try {
+                const { client } = await getRazorpayClient();
+                const payments = await client.orders.fetchPayments(order.razorpayOrderId);
+                if (payments && payments.items && payments.items.length > 0) {
+                     razorpayDetails = payments.items[0];
+                }
+            } catch (err) {
+                console.error("Error fetching razorpay order payments details:", err);
+            }
+        }
+
+        return res.success({ order, razorpayDetails });
     } catch (error) {
         return res.someThingWentWrong(error);
     }

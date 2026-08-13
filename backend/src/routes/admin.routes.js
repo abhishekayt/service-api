@@ -23,7 +23,8 @@ import {
     updateCreditPackAdmin,
     listUserLedger,
     updateUserStatus,
-    deleteUser
+    deleteUser,
+    getPaymentRazorpayDetails
 } from "../controller/admin/platform.controller.js";
 import { Storage } from "../libraries/storage.js";
 
@@ -68,6 +69,7 @@ router.delete("/credit-packs/:id", deleteCreditPackAdmin);
 
 // Payments & usage
 router.get("/payments", listPaymentsAdmin);
+router.get("/payments/:id/razorpay", getPaymentRazorpayDetails);
 router.get("/usage-logs", listUsageAdmin);
 
 // Roles
