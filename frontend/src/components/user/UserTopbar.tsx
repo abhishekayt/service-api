@@ -101,8 +101,12 @@ export default function UserTopbar() {
                 {/* User Profile Dropdown Menu */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 font-bold text-white shadow-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                            {user.name ? user.name.charAt(0).toUpperCase() : "D"}
+                        <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 font-bold text-white shadow-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 overflow-hidden">
+                            {user.image ? (
+                                <img src={`${process.env.NEXT_PUBLIC_API_URL}${user.image}`} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                user.name ? user.name.charAt(0).toUpperCase() : "D"
+                            )}
                         </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56">
@@ -117,25 +121,9 @@ export default function UserTopbar() {
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => router.push("/user/dashboard")}>
-                            <UserIcon className="mr-2 h-4 w-4 text-slate-500" />
-                            <span>Dashboard</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push("/user/api-keys")}>
-                            <KeyRound className="mr-2 h-4 w-4 text-slate-500" />
-                            <span>API Keys</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push("/user/credits")}>
-                            <Coins className="mr-2 h-4 w-4 text-slate-500" />
-                            <span>Buy Credits</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push("/user/docs")}>
-                            <BookOpen className="mr-2 h-4 w-4 text-slate-500" />
-                            <span>Documentation</span>
-                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => router.push("/user/settings")}>
                             <Settings className="mr-2 h-4 w-4 text-slate-500" />
-                            <span>Settings</span>
+                            <span>Profile</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 dark:text-red-400">

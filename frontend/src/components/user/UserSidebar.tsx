@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Coins, KeyRound, LayoutDashboard, ScrollText, Sparkles, Terminal, ChevronRight, BookOpen, Settings } from "lucide-react";
+import { Coins, KeyRound, LayoutDashboard, ScrollText, Sparkles, Terminal, ChevronRight, BookOpen, Settings, Dock, User } from "lucide-react";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { cn } from "@/lib/utils";
@@ -17,7 +17,7 @@ const NAV_ITEMS = [
     { href: "/user/credits", label: "Buy Credits", icon: Coins, badge: "Packs" },
     { href: "/user/usage", label: "Usage Logs", icon: ScrollText, badge: null },
     { href: "/user/playground", label: "API Playground", icon: Terminal, badge: "Live" },
-    { href: "/user/settings", label: "Settings", icon: Settings, badge: null },
+    { href: "/user/docs", label: "Documentation", icon: Dock, badge: null },
 ];
 
 export default function UserSidebar() {
@@ -166,8 +166,12 @@ export default function UserSidebar() {
             {!effectiveCollapsed ? (
                 <div className="mt-6 rounded-xl border border-slate-200/60 bg-slate-50/50 p-3 dark:border-slate-800/60 dark:bg-slate-800/30">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
-                            {user.name ? user.name.charAt(0).toUpperCase() : "D"}
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 overflow-hidden">
+                            {user.image ? (
+                                <img src={`${process.env.NEXT_PUBLIC_API_URL}${user.image}`} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                user.name ? user.name.charAt(0).toUpperCase() : "D"
+                            )}
                         </div>
                         <div className="min-w-0 flex-1">
                             <p className="truncate text-xs font-semibold text-slate-900 dark:text-white">
@@ -181,8 +185,12 @@ export default function UserSidebar() {
                 </div>
             ) : (
                 <div className="mt-6 flex justify-center" title={user.name || "Developer"}>
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
-                        {user.name ? user.name.charAt(0).toUpperCase() : "D"}
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 overflow-hidden">
+                        {user.image ? (
+                            <img src={`${process.env.NEXT_PUBLIC_API_URL}${user.image}`} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                            user.name ? user.name.charAt(0).toUpperCase() : "D"
+                        )}
                     </div>
                 </div>
             )}

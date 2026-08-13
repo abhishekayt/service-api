@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { User, KeyRound, Save, ShieldAlert, BadgeInfo } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { User, KeyRound, Save, ShieldAlert, BadgeInfo, Camera } from "lucide-react";
 import AxiosHelperUser from "@/helpers/AxiosHelperUser";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/Button";
@@ -16,7 +16,10 @@ export default function UserSettingsPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [mobile, setMobile] = useState("");
+    const [image, setImage] = useState("");
     const [profileLoading, setProfileLoading] = useState(false);
+    const [imageUploading, setImageUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Password form states
     const [currentPassword, setCurrentPassword] = useState("");
@@ -32,6 +35,7 @@ export default function UserSettingsPage() {
                 setName(data.data.name || "");
                 setEmail(data.data.email || "");
                 setMobile(data.data.mobile || "");
+                setImage(data.data.image || "");
             }
         })();
     }, []);
@@ -62,6 +66,37 @@ export default function UserSettingsPage() {
             toast.error(err.message || "Something went wrong");
         } finally {
             setProfileLoading(false);
+        }
+    };
+
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        // validate size (e.g. max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error("Image size should be less than 2MB");
+            return;
+        }
+
+        setImageUploading(true);
+        const formData = new FormData();
+        formData.append("image", file);
+
+        try {
+            const { data } = await AxiosHelperUser.putData("/profile/image", formData, true);
+            if (data?.status && data?.data?.image) {
+                setImage(data.data.image);
+                dispatch(updateUser({ image: data.data.image }));
+                toast.success("Profile image updated successfully");
+            } else {
+                toast.error(data?.message || "Failed to update profile image");
+            }
+        } catch (error: any) {
+            toast.error(error.message || "Something went wrong");
+        } finally {
+            setImageUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
         }
     };
 
@@ -167,6 +202,32 @@ export default function UserSettingsPage() {
                                     placeholder="+1234567890"
                                     className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                                 />
+                            </div>
+
+                            {/* Profile Image */}
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                                    <span>Profile Image</span>
+                                    {imageUploading && <span className="text-[10px] text-indigo-500 font-medium animate-pulse">Uploading...</span>}
+                                </label>
+                                <div className="flex items-center gap-3 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white transition-colors">
+                                    {image ? (
+                                        <div className="h-10 w-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-800 bg-slate-100">
+                                            <img src={`${process.env.NEXT_PUBLIC_API_URL}${image}`} alt="Profile" className="w-full h-full object-cover" />
+                                        </div>
+                                    ) : (
+                                        <div className="h-10 w-10 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-800 bg-slate-100 flex items-center justify-center">
+                                            <User className="h-5 w-5 text-slate-400" />
+                                        </div>
+                                    )}
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        ref={fileInputRef} 
+                                        onChange={handleImageChange}
+                                        className="w-full text-sm text-slate-500 file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-900/30 dark:file:text-indigo-400 cursor-pointer focus:outline-none"
+                                    />
+                                </div>
                             </div>
 
                             <Button

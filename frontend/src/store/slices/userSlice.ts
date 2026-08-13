@@ -6,6 +6,7 @@ type UserState = {
     name: string;
     email: string;
     mobile: string;
+    image?: string;
     balance: number;
     createdAt: string;
     lastLogin: string;

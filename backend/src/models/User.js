@@ -11,6 +11,7 @@ const Schema = new mongoose.Schema(
         password: { type: String, required: true, default: null, select: false },
         isActive: { type: Boolean, default: true },
         lastLogin: { type: Date, default: null },
+        image: { type: String, default: null },
         deletedAt: { type: Date, default: null }
     },
     { timestamps: true }

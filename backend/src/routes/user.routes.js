@@ -1,18 +1,21 @@
 import { Router } from "express";
 import { requireUserAuth } from "../middlewares/userAuth.js";
-import { userLogout, userProfile, userUpdateProfile, userUpdatePassword } from "../controller/user/auth.controller.js";
+import { userLogout, userProfile, userUpdateProfile, userUpdatePassword, userUpdateProfileImage } from "../controller/user/auth.controller.js";
 import { createApiKey, listApiKeys, revokeApiKey } from "../controller/user/apiKey.controller.js";
 import { getDashboard, listUsage } from "../controller/user/dashboard.controller.js";
 import { createPaymentOrder, listCreditPacks, listMyPayments, verifyPayment } from "../controller/user/payment.controller.js";
 import { validator } from "../libraries/validator.js";
+import { Storage } from "../libraries/storage.js";
 
 const router = Router();
+const userStorage = new Storage({ dir: "users", isImage: true, isDoc: false, fileSize: 2 });
 
 router.use(requireUserAuth);
 
 router.get("/profile", userProfile);
 router.put("/profile", userUpdateProfile);
 router.put("/profile/password", userUpdatePassword);
+router.put("/profile/image", userStorage.single("image"), userUpdateProfileImage);
 router.post("/logout", userLogout);
 
 router.get("/dashboard", getDashboard);

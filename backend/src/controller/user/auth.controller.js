@@ -90,7 +90,7 @@ export const userProfile = async (req, res) => {
     try {
         const user = await User.findOne(
             { _id: req.user.id, deletedAt: null },
-            { userId: 1, name: 1, email: 1, mobile: 1, createdAt: 1, lastLogin: 1 }
+            { userId: 1, name: 1, email: 1, mobile: 1, image: 1, createdAt: 1, lastLogin: 1 }
         );
         if (!user) return res.noRecords(false, "User not found");
 
@@ -143,7 +143,7 @@ export const userUpdateProfile = async (req, res) => {
         }
 
         await user.save();
-        return res.successUpdate({ _id: user._id, name: user.name, email: user.email, mobile: user.mobile }, "Profile updated successfully");
+        return res.successUpdate({ _id: user._id, name: user.name, email: user.email, mobile: user.mobile, image: user.image }, "Profile updated successfully");
     } catch (error) {
         return res.someThingWentWrong(error);
     }
@@ -166,6 +166,22 @@ export const userUpdatePassword = async (req, res) => {
         await user.save();
 
         return res.success([], "Password updated successfully");
+    } catch (error) {
+        return res.someThingWentWrong(error);
+    }
+};
+
+export const userUpdateProfileImage = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.noRecords(false, "User not found");
+
+        if (!req.file) throw new Error("Profile image is required.");
+
+        user.image = `/users/${req.file.filename}`;
+        await user.save();
+
+        return res.successUpdate({ _id: user._id, image: user.image }, "Profile image updated");
     } catch (error) {
         return res.someThingWentWrong(error);
     }
