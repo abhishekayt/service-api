@@ -103,7 +103,7 @@ export default function UserTopbar() {
                     <DropdownMenuTrigger asChild>
                         <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 font-bold text-white shadow-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 overflow-hidden">
                             {user.image ? (
-                                <img src={`${process.env.NEXT_PUBLIC_API_URL}${user.image}`} alt="Profile" className="w-full h-full object-cover" />
+                                <img src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}${user.image}`} alt="Profile" className="w-full h-full object-cover" />
                             ) : (
                                 user.name ? user.name.charAt(0).toUpperCase() : "D"
                             )}
