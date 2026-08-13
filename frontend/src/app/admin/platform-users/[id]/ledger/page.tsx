@@ -7,12 +7,14 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { ArrowLeft, Plus, Wallet } from "lucide-react";
 import AxiosHelperAdmin from "@/helpers/AxiosHelperAdmin";
-import { Button } from "@/components/ui";
+import { Button, Badge, type BadgeVariant } from "@/components/ui";
 import AdminPagination from "@/components/admin/AdminPagination";
 
 type Transaction = {
     _id: string;
+    txnId?: string;
     type: string;
+    source?: "self" | "admin" | "reward" | "api_usage" | "signup_bonus" | string;
     amount: number;
     balanceAfter: number;
     description: string;
@@ -30,7 +32,7 @@ type LedgerData = {
 export default function PlatformUserLedgerPage() {
     const params = useParams();
     const router = useRouter();
-    const [param, setParam] = useState({ pageNo: 1, limit: 10, type: "All" });
+    const [param, setParam] = useState({ pageNo: 1, limit: 10, query: "", type: "All" });
     const [data, setData] = useState<LedgerData>({
         user: { name: "", userId: "", balance: 0 },
         transactions: [],
@@ -120,33 +122,36 @@ export default function PlatformUserLedgerPage() {
                 </div>
             </div>
 
-            <div className="rounded-2xl border border-indigo-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+            <div className="rounded-2xl border border-indigo-100 bg-white p-5 md:p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div className="mb-5 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <input
-                        placeholder="Search voucher or particulars..."
-                        className="h-10 w-full max-w-sm rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:text-slate-100"
+                        value={param.query}
+                        onChange={(e) => setParam((prev) => ({ ...prev, pageNo: 1, query: e.target.value }))}
+                        placeholder="Search Ledger ID, particulars..."
+                        className="h-10 w-full max-w-sm rounded-lg border border-slate-200 bg-transparent px-3.5 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:text-slate-100"
                     />
                     <select
                         value={param.type}
                         onChange={(e) => setParam((prev) => ({ ...prev, pageNo: 1, type: e.target.value }))}
-                        className="h-10 rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:text-slate-100"
+                        className="h-10 rounded-lg border border-slate-200 bg-transparent px-3.5 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:text-slate-100"
                     >
-                        <option value="All">All</option>
-                        <option value="Credit">Credit</option>
-                        <option value="Debit">Debit</option>
+                        <option value="All">All Types</option>
+                        <option value="Credit">Credit (+)</option>
+                        <option value="Debit">Debit (-)</option>
                     </select>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-slate-800">
                     <table className="min-w-full text-sm">
-                        <thead className="bg-slate-50 text-left text-slate-600 dark:bg-slate-800/50 dark:text-slate-300">
+                        <thead className="bg-slate-50/90 text-left text-xs uppercase tracking-wider text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                             <tr>
-                                <th className="px-4 py-3 font-medium">Voucher</th>
-                                <th className="px-4 py-3 font-medium">Type</th>
-                                <th className="px-4 py-3 font-medium">Amount</th>
-                                <th className="px-4 py-3 font-medium">Updated Balance</th>
-                                <th className="px-4 py-3 font-medium">Particulars</th>
-                                <th className="px-4 py-3 font-medium">Date</th>
+                                <th className="px-4 py-3.5 font-semibold">Ledger ID</th>
+                                <th className="px-4 py-3.5 font-semibold">Source</th>
+                                <th className="px-4 py-3.5 font-semibold">Type</th>
+                                <th className="px-4 py-3.5 font-semibold">Amount</th>
+                                <th className="px-4 py-3.5 font-semibold">Updated Balance</th>
+                                <th className="px-4 py-3.5 font-semibold">Particulars</th>
+                                <th className="px-4 py-3.5 font-semibold">Date</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -155,26 +160,52 @@ export default function PlatformUserLedgerPage() {
                                 const isPositive = txn.amount > 0;
                                 const isActuallyCredit = isCredit || (txn.type === "adjustment" && isPositive);
 
+                                const sourceLabel = txn.source === "admin"
+                                    ? "Admin"
+                                    : txn.source === "reward"
+                                    ? "Reward"
+                                    : txn.source === "api_usage"
+                                    ? "API Usage"
+                                    : txn.source === "signup_bonus"
+                                    ? "Bonus"
+                                    : "Self";
+                                const sourceVariant: BadgeVariant = txn.source === "admin"
+                                    ? "secondary"
+                                    : txn.source === "reward"
+                                    ? "warning"
+                                    : txn.source === "api_usage"
+                                    ? "outline"
+                                    : txn.source === "signup_bonus"
+                                    ? "info"
+                                    : "outline";
+
                                 return (
                                     <tr key={txn._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20">
-                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400">TR{txn._id.slice(-6).toUpperCase()}</td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-4 py-3.5 font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                                            {txn.txnId || `TR${txn._id.slice(-6).toUpperCase()}`}
+                                        </td>
+                                        <td className="px-4 py-3.5">
+                                            <Badge variant={sourceVariant} size="sm" className="capitalize font-semibold">
+                                                {sourceLabel}
+                                            </Badge>
+                                        </td>
+                                        <td className="px-4 py-3.5">
                                             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${isActuallyCredit ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}>
                                                 {isActuallyCredit ? "Credit" : "Debit"}
                                             </span>
                                         </td>
-                                        <td className={`px-4 py-3 font-medium ${isActuallyCredit ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
+                                        <td className={`px-4 py-3.5 font-medium ${isActuallyCredit ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
                                             ₹{Math.abs(txn.amount).toFixed(2)}
                                         </td>
-                                        <td className="px-4 py-3 text-slate-900 dark:text-slate-300">₹{txn.balanceAfter?.toFixed(2) || "0.00"}</td>
-                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{txn.description || txn.type}</td>
-                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{moment(txn.createdAt).format("DD-MM-YYYY hh:mm A")}</td>
+                                        <td className="px-4 py-3.5 text-slate-900 dark:text-slate-300">₹{txn.balanceAfter?.toFixed(2) || "0.00"}</td>
+                                        <td className="px-4 py-3.5 text-slate-600 dark:text-slate-400">{txn.description || txn.type}</td>
+                                        <td className="px-4 py-3.5 text-slate-600 dark:text-slate-400">{moment(txn.createdAt).format("DD-MM-YYYY hh:mm A")}</td>
                                     </tr>
                                 );
                             })}
                             {!data.transactions.length && (
                                 <tr>
-                                    <td colSpan={6} className="px-4 py-8 text-center text-slate-500">No transactions found.</td>
+                                    <td colSpan={7} className="px-4 py-8 text-center text-slate-500">No transactions found.</td>
                                 </tr>
                             )}
                         </tbody>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Coins, KeyRound, LayoutDashboard, ScrollText, Sparkles, Terminal, ChevronRight, BookOpen, Settings, Dock, User } from "lucide-react";
+import { Coins, KeyRound, LayoutDashboard, ScrollText, Sparkles, Terminal, ChevronRight, BookOpen, Settings, Dock, User, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
     { href: "/user/dashboard", label: "Dashboard", icon: LayoutDashboard, badge: null },
     { href: "/user/api-keys", label: "API Keys", icon: KeyRound, badge: null },
     { href: "/user/credits", label: "Buy Credits", icon: Coins, badge: "Packs" },
+    { href: "/user/ledger", label: "Credit Ledger", icon: TrendingUp, badge: null },
     { href: "/user/usage", label: "Usage Logs", icon: ScrollText, badge: null },
     { href: "/user/playground", label: "API Playground", icon: Terminal, badge: "Live" },
     { href: "/user/docs", label: "Documentation", icon: Dock, badge: null },

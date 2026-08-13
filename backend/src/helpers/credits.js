@@ -11,7 +11,7 @@ export const getOrCreateWallet = async (userId, session = null) => {
     return wallet;
 };
 
-export const creditWallet = async ({ userId, amount, type, description, referenceType = null, referenceId = null, meta = null, session = null }) => {
+export const creditWallet = async ({ userId, amount, type, description, source = null, referenceType = null, referenceId = null, meta = null, session = null }) => {
     if (amount <= 0) throw new Error("Credit amount must be positive");
 
     const wallet = await Wallet.findOneAndUpdate(
@@ -20,26 +20,25 @@ export const creditWallet = async ({ userId, amount, type, description, referenc
         { new: true, upsert: true, setDefaultsOnInsert: true, session }
     );
 
-    await CreditLedger.create(
-        [
-            {
-                userId,
-                type,
-                amount,
-                balanceAfter: wallet.balance,
-                referenceType,
-                referenceId,
-                description,
-                meta
-            }
-        ],
-        { session }
-    );
+    const resolvedSource = source || (type === "signup_bonus" ? "signup_bonus" : "self");
+
+    const ledgerDoc = new CreditLedger({
+        userId,
+        type,
+        source: resolvedSource,
+        amount,
+        balanceAfter: wallet.balance,
+        referenceType,
+        referenceId,
+        description,
+        meta
+    });
+    await ledgerDoc.save({ session });
 
     return wallet;
 };
 
-export const debitWallet = async ({ userId, amount, description, referenceType = null, referenceId = null, meta = null, session = null }) => {
+export const debitWallet = async ({ userId, amount, description, source = "api_usage", referenceType = null, referenceId = null, meta = null, session = null }) => {
     if (amount <= 0) throw new Error("Debit amount must be positive");
 
     const wallet = await Wallet.findOneAndUpdate(
@@ -54,21 +53,18 @@ export const debitWallet = async ({ userId, amount, description, referenceType =
         throw err;
     }
 
-    await CreditLedger.create(
-        [
-            {
-                userId,
-                type: "debit",
-                amount: -amount,
-                balanceAfter: wallet.balance,
-                referenceType,
-                referenceId,
-                description,
-                meta
-            }
-        ],
-        { session }
-    );
+    const ledgerDoc = new CreditLedger({
+        userId,
+        type: "debit",
+        source,
+        amount: -amount,
+        balanceAfter: wallet.balance,
+        referenceType,
+        referenceId,
+        description,
+        meta
+    });
+    await ledgerDoc.save({ session });
 
     return wallet;
 };

@@ -47,15 +47,17 @@ export const adjustUserCredits = async (req, res) => {
 
         await getOrCreateWallet(user._id);
 
+        const source = description.toLowerCase().includes("reward") || description.toLowerCase().includes("bonus") ? "reward" : "admin";
+
         if (amount > 0) {
             const wallet = await creditWallet({
                 userId: user._id,
                 amount,
                 type: "adjustment",
+                source,
                 description,
                 meta: { adminId: req.admin.id }
             });
-            const source = description.toLowerCase().includes("reward") || description.toLowerCase().includes("bonus") ? "reward" : "admin";
             await PaymentOrder.create({
                 userId: user._id,
                 credits: amount,
@@ -75,6 +77,7 @@ export const adjustUserCredits = async (req, res) => {
             const wallet = await debitWallet({
                 userId: user._id,
                 amount: Math.abs(amount),
+                source: "admin",
                 description,
                 meta: { adminId: req.admin.id }
             });
@@ -249,9 +252,41 @@ export const platformStats = async (req, res) => {
 
 export const listUserLedger = async (req, res) => {
     try {
-        const { limit = 10, pageNo = 1 } = req.query;
+        const { limit = 10, pageNo = 1, query, type } = req.query;
         const skip = (pageNo - 1) * limit;
         const filter = { userId: req.params.id };
+
+        if (type && type !== "All") {
+            if (type === "Credit") {
+                filter.$or = [
+                    { type: { $in: ["topup", "signup_bonus", "refund"] } },
+                    { type: "adjustment", amount: { $gt: 0 } }
+                ];
+            } else if (type === "Debit") {
+                filter.$or = [
+                    { type: "debit" },
+                    { type: "adjustment", amount: { $lt: 0 } }
+                ];
+            }
+        }
+
+        if (query) {
+            const q = escapeRegex(query);
+            const queryFilter = {
+                $or: [
+                    { txnId: { $regex: q, $options: "i" } },
+                    { description: { $regex: q, $options: "i" } },
+                    { type: { $regex: q, $options: "i" } },
+                    { source: { $regex: q, $options: "i" } }
+                ]
+            };
+            if (filter.$or) {
+                filter.$and = [{ $or: filter.$or }, queryFilter];
+                delete filter.$or;
+            } else {
+                Object.assign(filter, queryFilter);
+            }
+        }
 
         const [count, record] = await Promise.all([
             CreditLedger.countDocuments(filter),

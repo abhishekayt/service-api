@@ -30,20 +30,25 @@ export default function UserUsagePage() {
     const [records, setRecords] = useState<UsageItem[]>([]);
     const [selectedItem, setSelectedItem] = useState<UsageItem | null>(null);
     const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [param, setParam] = useState({ pageNo: 1, limit: 15 });
+    const [count, setCount] = useState(0);
 
     useEffect(() => {
         (async () => {
-            const { data } = await AxiosHelperUser.getData("/usage", { pageNo: 1, limit: 100 });
+            const { data } = await AxiosHelperUser.getData("/usage", param);
             if (data?.status) {
                 setRecords(data.data?.record || []);
+                setCount(data.data?.count || 0);
             }
         })();
-    }, []);
+    }, [param]);
 
     const filteredRecords = useMemo(() => {
         if (statusFilter === "all") return records;
         return records.filter((r) => r.status.toLowerCase() === statusFilter);
     }, [records, statusFilter]);
+
+    const totalPages = Math.ceil(count / param.limit) || 1;
 
     return (
         <div className="space-y-6">
@@ -87,7 +92,7 @@ export default function UserUsagePage() {
                     <CardTitle className="text-base">Execution History ({filteredRecords.length})</CardTitle>
                     <CardDescription>Click on any log row to inspect detailed execution metadata.</CardDescription>
                 </CardHeader>
-                <CardContent className="p-0">
+                <CardContent className="p-5 md:p-6 pt-0">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -155,6 +160,34 @@ export default function UserUsagePage() {
                             ))}
                         </TableBody>
                     </Table>
+
+                    {/* Pagination Bar */}
+                    {count > 0 && (
+                        <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3 dark:border-slate-800">
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                Page <span className="font-semibold">{param.pageNo}</span> of{" "}
+                                <span className="font-semibold">{totalPages}</span> ({count} logs)
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={param.pageNo <= 1}
+                                    onClick={() => setParam((prev) => ({ ...prev, pageNo: prev.pageNo - 1 }))}
+                                >
+                                    Previous
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={param.pageNo >= totalPages}
+                                    onClick={() => setParam((prev) => ({ ...prev, pageNo: prev.pageNo + 1 }))}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 

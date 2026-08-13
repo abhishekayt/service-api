@@ -142,14 +142,14 @@ export const verifyPayment = async (req, res) => {
 
 export const listMyPayments = async (req, res) => {
     try {
-        const { limit, pageNo } = req.query;
-        const skip = (pageNo - 1) * limit;
+        const { limit = 10, pageNo = 1 } = req.query;
+        const skip = (Number(pageNo) - 1) * Number(limit);
         const filter = { userId: req.user.id };
         const [count, record] = await Promise.all([
             PaymentOrder.countDocuments(filter),
-            PaymentOrder.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit)
+            PaymentOrder.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit))
         ]);
-        return res.pagination(record, count, limit, pageNo);
+        return res.pagination(record, count, Number(limit), Number(pageNo));
     } catch (error) {
         return res.someThingWentWrong(error);
     }

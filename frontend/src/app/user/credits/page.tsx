@@ -63,18 +63,23 @@ export default function BuyCreditsPage() {
     const [buyingId, setBuyingId] = useState<string | null>(null);
     const [payments, setPayments] = useState<PaymentItem[]>([]);
     const [loadingPayments, setLoadingPayments] = useState<boolean>(true);
+    const [paymentParam, setPaymentParam] = useState({ pageNo: 1, limit: 10 });
+    const [paymentCount, setPaymentCount] = useState(0);
 
     const fetchPayments = useCallback(async () => {
         setLoadingPayments(true);
         try {
-            const { data } = await AxiosHelperUser.getData("/payments", { limit: 50, pageNo: 1 });
+            const { data } = await AxiosHelperUser.getData("/payments", paymentParam);
             if (data?.status) {
                 setPayments(data.data?.record || []);
+                setPaymentCount(data.data?.count || 0);
             }
         } finally {
             setLoadingPayments(false);
         }
-    }, []);
+    }, [paymentParam]);
+
+    const paymentTotalPages = Math.ceil(paymentCount / paymentParam.limit) || 1;
 
     useEffect(() => {
         (async () => {
@@ -262,7 +267,7 @@ export default function BuyCreditsPage() {
                         </CardDescription>
                     </div>
                 </CardHeader>
-                <CardContent className="p-0">
+                <CardContent className="p-5 md:p-6 pt-0">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -338,6 +343,34 @@ export default function BuyCreditsPage() {
                             )}
                         </TableBody>
                     </Table>
+
+                    {/* Pagination Bar */}
+                    {paymentCount > 0 && (
+                        <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3 dark:border-slate-800">
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                Page <span className="font-semibold">{paymentParam.pageNo}</span> of{" "}
+                                <span className="font-semibold">{paymentTotalPages}</span> ({paymentCount} orders)
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={paymentParam.pageNo <= 1}
+                                    onClick={() => setPaymentParam((prev) => ({ ...prev, pageNo: prev.pageNo - 1 }))}
+                                >
+                                    Previous
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={paymentParam.pageNo >= paymentTotalPages}
+                                    onClick={() => setPaymentParam((prev) => ({ ...prev, pageNo: prev.pageNo + 1 }))}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>
